@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # Servicio de Base de Datos (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: climai_db
+    restart: always
+    env_file:
+      - ../.env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_DB=${POSTGRES_DB:-climai_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. Redis
+  redis:
+    image: redis:alpine
+    container_name: climai_redis
+    ports:
+      - "6379:6379"
+
+  # 3. Servicio de la API (FastAPI)
+  app:
+    build:
+      context: ..
+      dockerfile: ./Dockerfile
+    container_name: climai_app
+    restart: always
+    env_file:
+      - ../.env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../:/app
+    depends_on:
+      - db
+      - redis
+
+  # 4. Worker (Celery)
+  worker:
+    build:
+      context: ..
+      dockerfile: ./Dockerfile
+    container_name: climai_worker
+    # Sobreescribimos el comando del Dockerfile para que arranque Celery en vez de Uvicorn
+    command: celery -A app.core.celery_app worker --loglevel=info
+    env_file:
+      - ../.env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ../:/app
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:
