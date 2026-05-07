@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+
+# Variables de entorno 
+.env
+
+# Modelos de IA y datos pesados
+*.pkl
+*.csv
+*.log
+
+# Base de datos local 
+
+# IDEs
+.vscode/
+.idea/
+
+# Sistema
+.DS_Store
+Thumbs.db

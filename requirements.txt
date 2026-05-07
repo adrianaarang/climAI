@@ -1,0 +1,25 @@
+# Web Framework & Server
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Database
+sqlalchemy[asyncio]
+asyncpg
+alembic
+psycopg2-binary
+
+# Backend Tasks (Worker)
+celery
+redis
+
+# Data Science & IA (Para la predicción)
+pandas
+numpy
+scikit-learn
+joblib
+
+# Utilities
+python-dotenv
+httpx
+jinja2
