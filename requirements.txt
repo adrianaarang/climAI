@@ -13,13 +13,18 @@ psycopg2-binary
 celery
 redis
 
-# Data Science & IA (Para la predicción)
+# Data Science & IA
 pandas
 numpy
 scikit-learn
 joblib
 
 # Utilities
-python-dotenv
 httpx
 jinja2
+
+# Config & Environment
+python-dotenv
+pydantic>=2.0
+pydantic-settings
+pydantic[email]
