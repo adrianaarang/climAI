@@ -7,7 +7,7 @@ def normalize_weather_data(raw_data: dict) -> dict:
 
     return {
         "station_id": raw_data.get("idema"),
-        "Zone": raw_data.get("ubi"),
+        "zone": raw_data.get("ubi"),
         "temperature": raw_data.get("ta"),
         "temp_min": raw_data.get("tamin"),
         "temp_max": raw_data.get("tamax"),
