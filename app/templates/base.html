@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>{% block title %}ClimAI{% endblock %}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="/static/css/base.css">
+  
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <span class="dot"></span>
+      ClimAI
+    </a>
+    <div class="navbar-links">
+      {% if usuario %}
+        <a href="/" class="nav-link">Dashboard</a>
+        <a href="/estadisticas" class="nav-link">Estadísticas Avanzadas</a>
+        <a href="/prediccion" class="nav-link">Predicción IA</a>
+        <a href="/alertas" class="nav-link">Mis Alertas</a>
+        <a href="/vincular-telegram" class="nav-link">Vincular Telegram </a>
+        <a href="/logout" class="nav-link">Cerrar sesión</a>
+            {% else %}
+        <a href="/" class="nav-link">Dashboard</a>
+        <a href="/login" class="nav-link">Iniciar sesión</a>
+        <a href="/registro_usuario" class="nav-link">Registro</a>
+    {% endif %}
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    {% block content %}{% endblock %}
+  </div>
+
+  <script src="/static/js/base.js"></script>
+  
+  {% block extra_js %}{% endblock %}
+
+</body>
+</html>
