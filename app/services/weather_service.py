@@ -8,6 +8,8 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from app.services.normalizer_service import normalize_weather_data
+
 from app.models.database import Province, Station, Record
 
 AEMET_BASE    = "https://opendata.aemet.es/opendata/api/observacion/convencional/todas"
@@ -134,20 +136,32 @@ class WeatherAPIService:
 
             # --- PASO 6: Guardar registro actual ---
             try:
+                normalized = normalize_weather_data(est_aemet)
+
                 nuevo_registro = Record(
-                    timestamp=datetime.now(),
-                    temperature=float(est_aemet.get("ta") or 0),
-                    humidity=float(est_aemet.get("hr") or 0),
-                    wind=float(est_aemet.get("vv") or 0),
-                    rain=float(est_aemet.get("prec") or 0.0),
+                    timestamp=normalized["timestamp"],
+                    temperature=normalized["temperature"],
+                    humidity=normalized["humidity"],
+                    wind=normalized["wind_speed"],
+                    rain=normalized["precipitation"],
                     station_id=estacion_db.station_id,
                 )
+
                 self.db.add(nuevo_registro)
+
                 await self.db.commit()
-                print(f"[weather_service] Registro guardado — {nuevo_registro.temperature}°C")
+
+                print(
+                    f"[weather_service] Registro guardado — "
+                    f"{nuevo_registro.temperature}°C"
+                )
+
             except Exception as e:
+
                 print(f"[weather_service] Error guardando registro: {e}")
+
                 await self.db.rollback()
+
                 return None
 
             # --- PASO 7: Histórico para las gráficas ---
