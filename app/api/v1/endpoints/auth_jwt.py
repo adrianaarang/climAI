@@ -11,7 +11,7 @@ from app.core.security import verify_password, create_access_token
 
 router = APIRouter(prefix="/auth", tags=["Autenticación JWT"])
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
 # ══════════════════════════════════════════════════════════════
