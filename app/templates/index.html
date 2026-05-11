@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}ClimAI · Dashboard{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="/static/css/index.css">
+{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+  <div class="header-left">
+    <p class="eyebrow">ClimAI · Tiempo Real</p>
+    <h1 class="page-title" id="mainTitle">Cargando ubicación...</h1>
+  </div>
+  {% if usuario %}
+  <div class="user-badge">
+    <span class="user-name">Hola, <strong>{{ usuario }}</strong></span>
+    <span class="user-status">Suscrito a alertas</span>
+  </div>
+  {% endif %}
+</header>
+
+<div class="dashboard-grid">
+
+  <article class="card hero-card">
+    <div class="hero-left">
+      <p class="location-label">Municipio</p>
+      <h2 class="city-name" id="cityName">Detectando...</h2>
+      <p class="station-name" id="stationName">Buscando estación cercana...</p>
+      <div class="temp-row">
+        <span class="temperature" id="temperature">--°</span>
+        <span class="status-dot" id="statusDot"></span>
+      </div>
+      <p class="updated-at" id="updatedAt">Esperando permisos...</p>
+    </div>
+    <div class="hero-right" id="weather-icon-container">
+      <div class="sun" id="sun-icon">
+        <span class="sun-core"></span>
+        <span class="ray ray-1"></span><span class="ray ray-2"></span>
+        <span class="ray ray-3"></span><span class="ray ray-4"></span>
+        <span class="ray ray-5"></span><span class="ray ray-6"></span>
+        <span class="ray ray-7"></span><span class="ray ray-8"></span>
+      </div>
+    </div>
+  </article>
+
+  <article class="card nav-card">
+    <h3>Panel de Control</h3>
+    <nav class="nav-links">
+      <a href="/" class="nav-item active"><span class="nav-icon">🌤</span> Dashboard</a>
+      
+      {% if usuario %}
+        <a href="/stats" class="nav-item"><span class="nav-icon">📊</span> Estadísticas Avanzadas</a>
+        <a href="/prediccion" class="nav-item"><span class="nav-icon">🤖</span> Predicción IA</a>
+        <a href="/alertas" class="nav-item"><span class="nav-icon">🔔</span> Mis Alertas</a>
+        <div class="nav-divider"></div>
+        <a href="/configurar-telegram" class="nav-item secondary"><span class="nav-icon">📱</span> Vincular Telegram</a>
+        <a href="/logout" class="nav-item danger"><span class="nav-icon">↩</span> Cerrar sesión</a>
+      {% else %}
+        <div class="nav-divider"></div>
+        <a href="/login" class="nav-item"><span class="nav-icon">🔑</span> Iniciar sesión</a>
+        <a href="/registro_usuario" class="nav-item"><span class="nav-icon">✏️</span> Registro</a>
+        <a href="/weather-province" class="nav-item">
+      <span class="nav-icon">🗺️</span> Consultar por Provincias
+</a>
+      {% endif %}
+    </nav>
+    <button id="refreshBtn" class="refresh-btn">↻ Actualizar datos</button>
+  </article>
+
+  <article class="card metrics-card">
+    <h3>Condiciones actuales</h3>
+    <div class="metrics-grid">
+      <div class="metric-box">
+        <p class="metric-label">Humedad</p>
+        <p class="metric-value" id="humidity">--%</p>
+      </div>
+      <div class="metric-box">
+        <p class="metric-label">Viento</p>
+        <p class="metric-value" id="wind">-- km/h</p>
+      </div>
+      <div class="metric-box">
+        <p class="metric-label">Lluvia</p>
+        <p class="metric-value" id="rain">-- mm</p>
+      </div>
+      <div class="metric-box">
+        <p class="metric-label">IA Status</p>
+        <p class="metric-value small" id="ia-status">Conectado</p>
+      </div>
+    </div>
+  </article>
+
+  <article class="card ai-card">
+    <div class="ai-header">
+      <h3>Pronóstico IA (Regresión)</h3>
+      <span class="badge">Siguiente 6h</span>
+    </div>
+    <div class="prediction-display">
+      <div class="prediction-item">
+        <span class="pred-label">Temp. Estimada</span>
+        <span class="pred-value" id="pred-temp">--°C</span>
+      </div>
+      <div class="prediction-trend">
+        <span class="trend-icon" id="trend-icon">→</span>
+        <span id="trend-text">Calculando tendencia...</span>
+      </div>
+    </div>
+    <p class="ai-footer">Basado en el modelo <code>modelo_clima.pkl</code> </p>
+  </article>
+
+  <article class="card chart-card">
+    <div class="chart-header">
+      <p class="chart-title">Histórico y Promedios </p>
+      <div class="chart-tabs">
+        <button class="chart-tab active" id="tabTemp">Temperatura</button>
+        <button class="chart-tab" id="tabHumedad">Humedad</button>
+        <button class="chart-tab" id="tabLluvia">Lluvia</button>
+      </div>
+    </div>
+    <div class="chart-wrapper">
+      <canvas id="climaChart"></canvas>
+    </div>
+  </article>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="/static/js/index.js"></script>
+{% endblock %}
