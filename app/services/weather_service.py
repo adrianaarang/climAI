@@ -11,6 +11,7 @@ from sqlalchemy.future import select
 
 from app.models.database import Province, Station, Record
 from app.services.weather_ai_service import WeatherAIService
+from app.services.alert_service import AlertService
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ class WeatherAPIService:
         self.api_key = os.getenv("AEMET_API_KEY")  # Clave de AEMET desde el .env
         self.headers = {"api_key": self.api_key, "cache-control": "no-cache"}
         self.ai = WeatherAIService()  # Servicio de IA para el pronóstico
-
+        self.alert_service = AlertService()  # Servicio de alertas climáticas
 
     async def obtener_clima_por_coordenadas(self, lat: float, lon: float) -> Optional[dict]:
         """
@@ -93,6 +94,7 @@ class WeatherAPIService:
                     "es_noche": not (7 <= datetime.now().hour <= 21),  # True si es de noche
                     "pronostico_ia": pronostico,
                     "historico": hist_data,
+                    "alertas": self.alert_service.evaluar_alertas(nuevo_registro)
                 }
 
             except Exception as e:
