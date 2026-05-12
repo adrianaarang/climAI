@@ -18,8 +18,8 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "climai_db")
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
-        "postgresql+asyncpg://postgres:password@db:5432/climai_db"
-    )
+        f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@db:5432/{POSTGRES_DB}"
+)
 
     # ── Servicios externos (Persona 1) ───────────────────
     AEMET_API_KEY: str = os.getenv("AEMET_API_KEY", "")
