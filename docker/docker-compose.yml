@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Servicio de Base de Datos (PostgreSQL)
+  # 1. Base de Datos (PostgreSQL)
   db:
     image: postgres:15-alpine
     container_name: climai_db
@@ -24,7 +24,7 @@ services:
     ports:
       - "6379:6379"
 
-  # 3. Servicio de la API (FastAPI)
+  # 3. Aplicación (FastAPI)
   app:
     build:
       context: ..
@@ -44,13 +44,12 @@ services:
       - db
       - redis
 
-  # 4. Worker (Celery)
+  # 4. Trabajador (Celery)
   worker:
     build:
       context: ..
       dockerfile: ./Dockerfile
     container_name: climai_worker
-    # Sobreescribimos el comando del Dockerfile para que arranque Celery en vez de Uvicorn
     command: celery -A app.core.celery_app worker --loglevel=info
     env_file:
       - ../.env
