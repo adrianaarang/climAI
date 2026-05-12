@@ -11,12 +11,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
-
+    return pwd_context.hash(password[:72])      # ← trunca a 72 bytes
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
-
+    return pwd_context.verify(plain_password[:72], hashed_password)
 
 def create_access_token(
     data: dict,
@@ -31,13 +29,11 @@ def create_access_token(
 
     to_encode.update({"exp": expire})
 
-    encoded_jwt = jwt.encode(
+    return jwt.encode(
         to_encode,
         settings.SECRET_KEY,
         algorithm="HS256"
     )
-
-    return encoded_jwt
 
 
 def decode_access_token(token: str) -> Optional[str]:
@@ -47,6 +43,10 @@ def decode_access_token(token: str) -> Optional[str]:
             settings.SECRET_KEY,
             algorithms=["HS256"]
         )
+     
+
+
+
         email: str = payload.get("sub")
 
         if email is None:
