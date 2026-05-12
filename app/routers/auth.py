@@ -1,5 +1,5 @@
 import os
-from fastapi import APIRouter, Request, Form, Depends, HTTPException
+from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,19 +7,21 @@ from sqlalchemy.future import select
 from app.db.session import get_db
 from app.models.database import User
 
-# Configuramos el router y los templates
 router = APIRouter(tags=["Autenticación"])
 templates = Jinja2Templates(directory="app/templates")
 
-# Helper para leer la cookie
 def obtener_usuario_actual(request: Request):
     return request.cookies.get("usuario_login")
 
-# --- RUTAS DE LOGIN ---
+# --- LOGIN ---
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request, "usuario": None})
+    return templates.TemplateResponse(
+        request=request,
+        name="login.html",
+        context={"usuario": None}
+    )
 
 @router.post("/login")
 async def login_process(
@@ -29,8 +31,7 @@ async def login_process(
     db: AsyncSession = Depends(get_db),
 ):
     try:
-        query = select(User).where(User.email == email)
-        result = await db.execute(query)
+        result = await db.execute(select(User).where(User.email == email))
         user = result.scalar_one_or_none()
 
         if user and user.password == password:
@@ -38,24 +39,28 @@ async def login_process(
             response.set_cookie(key="usuario_login", value=user.email)
             return response
 
-        return templates.TemplateResponse("login.html", {
-            "request": request,
-            "error": "Email o contraseña incorrectos",
-            "usuario": None,
-        })
+        return templates.TemplateResponse(
+            request=request,
+            name="login.html",
+            context={"error": "Email o contraseña incorrectos", "usuario": None}
+        )
     except Exception as e:
         print(f"Error en Login: {e}")
-        return templates.TemplateResponse("login.html", {
-            "request": request,
-            "error": "Error interno del servidor",
-            "usuario": None,
-        })
+        return templates.TemplateResponse(
+            request=request,
+            name="login.html",
+            context={"error": "Error interno del servidor", "usuario": None}
+        )
 
-# --- RUTAS DE REGISTRO ---
+# --- REGISTRO ---
 
 @router.get("/registro_usuario", response_class=HTMLResponse)
 async def register_page(request: Request):
-    return templates.TemplateResponse("registro_usuario.html", {"request": request, "usuario": None})
+    return templates.TemplateResponse(
+        request=request,
+        name="registro_usuario.html",
+        context={"usuario": None}
+    )
 
 @router.post("/registro_usuario")
 async def register_process(
@@ -66,19 +71,20 @@ async def register_process(
     db: AsyncSession = Depends(get_db),
 ):
     if password != confirm_password:
-        return templates.TemplateResponse("registro_usuario.html", {
-            "request": request,
-            "error": "Las contraseñas no coinciden"
-        })
+        return templates.TemplateResponse(
+            request=request,
+            name="registro_usuario.html",
+            context={"error": "Las contraseñas no coinciden"}
+        )
 
     try:
-        query = select(User).where(User.email == email)
-        result = await db.execute(query)
+        result = await db.execute(select(User).where(User.email == email))
         if result.scalar_one_or_none():
-            return templates.TemplateResponse("registro_usuario.html", {
-                "request": request,
-                "error": "El email ya está registrado"
-            })
+            return templates.TemplateResponse(
+                request=request,
+                name="registro_usuario.html",
+                context={"error": "El email ya está registrado"}
+            )
 
         nuevo_usuario = User(email=email, password=password)
         db.add(nuevo_usuario)
@@ -88,10 +94,11 @@ async def register_process(
     except Exception as e:
         await db.rollback()
         print(f"Error DB: {e}")
-        return templates.TemplateResponse("registro_usuario.html", {
-            "request": request,
-            "error": "Error interno al procesar el registro"
-        })
+        return templates.TemplateResponse(
+            request=request,
+            name="registro_usuario.html",
+            context={"error": "Error interno al procesar el registro"}
+        )
 
 # --- LOGOUT ---
 

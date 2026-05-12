@@ -1,129 +1,46 @@
-import os
-from fastapi import FastAPI, Request, Depends
-from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+# app/main.py
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
+from fastapi.staticfiles import StaticFiles
 
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from app.db.session import engine, get_db
-from app.db.base_class import Base
-from app.models.database import User
+from app.core.config import settings
+from app.api.v1.api_router import api_router
+from app.routers import auth as auth_frontend
+from app.routers import provincias
 
-from app.routers.auth import router as auth_router, obtener_usuario_actual
-from app.routers.provincias import router as provincias_router
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    version=settings.APP_VERSION,
+    description="API para el Sistema de Gestión Climática — climAI",
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
 
-load_dotenv()
-
-app = FastAPI(title="ClimAI", version="1.0.0")
-
-# ── Startup ────────────────────────────────────────────────────────────────────
-@app.on_event("startup")
-async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-# ── CORS ───────────────────────────────────────────────────────────────────────
+# ── CORS ─────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ── Estáticos ──────────────────────────────────────────────────────────────────
-if os.path.exists("app/static"):
-    app.mount("/static", StaticFiles(directory="app/static"), name="static")
+# ── Archivos estáticos (CSS, JS) ─────────────────────────────
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
-templates = Jinja2Templates(directory="app/templates")
+# ── Rutas API REST ───────────────────────────────────────────
+app.include_router(api_router, prefix="/api/v1")
 
-# ── Servicios ──────────────────────────────────────────────────────────────────
-try:
-    from app.services.weather_service import obtener_clima_cercano
-except ImportError as e:
-    print(f"[main] Error importando weather_service: {e}")
-
-try:
-    from app.services.alert_service import AlertService
-except ImportError as e:
-    print(f"[main] Error importando alert_service: {e}")
-    AlertService = None
-
-# ── Routers ────────────────────────────────────────────────────────────────────
-app.include_router(auth_router)
-app.include_router(provincias_router)  # expone GET /api/provinces
-
-# ── Páginas ────────────────────────────────────────────────────────────────────
-
-@app.get("/", response_class=HTMLResponse)
-async def root(request: Request):
-    user = obtener_usuario_actual(request)
-    return templates.TemplateResponse("index.html", {"request": request, "usuario": user})
+# ── Rutas Frontend ───────────────────────────────────────────
+app.include_router(auth_frontend.router)
+app.include_router(provincias.router)
 
 
-@app.get("/weather-province", response_class=HTMLResponse)
-async def interface_provincias(request: Request):
-    user = obtener_usuario_actual(request)
-    return templates.TemplateResponse("weather_province.html", {"request": request, "usuario": user})
-
-
-@app.get("/alertas", response_class=HTMLResponse)
-async def pagina_alertas(request: Request):
-    user = obtener_usuario_actual(request)
-    if not user:
-        return RedirectResponse(url="/login")
-    return templates.TemplateResponse("alertas.html", {"request": request, "usuario": user})
-
-# ── API Clima ──────────────────────────────────────────────────────────────────
-
-@app.get("/api/clima")
-async def get_weather_data(
-    lat: float = None,
-    lon: float = None,
-    db: AsyncSession = Depends(get_db),
-):
-    if lat is None or lon is None:
-        return {"error": "Se requiere lat y lon"}
-
-    try:
-        raw = await obtener_clima_cercano(lat, lon, db)
-
-        if not raw:
-            return {"error": "No hay datos disponibles para esta selección"}
-
-        return {
-            "temperature":     raw.get("temperatura", 0),
-            "humidity":        raw.get("humedad", 0),
-            "wind_speed":      raw.get("viento", 0),
-            "precipitation":   raw.get("precipitacion", 0.0),
-            "estacion_nombre": raw.get("estacion_nombre", "Desconocida"),
-            "ciudad_buscada":  raw.get("ciudad_buscada", "Ubicación detectada"),
-            "es_noche":        raw.get("es_noche", False),
-            "historico":       raw.get("historico"),
-        }
-
-    except Exception as e:
-        print(f"[main /api/clima] Error: {e}")
-        return {"error": "Error interno del servidor"}
-
-# ── API Alertas ────────────────────────────────────────────────────────────────
-
-@app.post("/api/alertas/crear")
-async def api_crear_alerta(datos: dict, request: Request, db: AsyncSession = Depends(get_db)):
-    user_email = obtener_usuario_actual(request)
-    if not user_email:
-        return {"status": "error", "message": "Debes estar logueado"}
-
-    if not AlertService:
-        return {"status": "error", "message": "Servicio de alertas no disponible"}
-
-    result = await db.execute(select(User).where(User.email == user_email))
-    user = result.scalar_one_or_none()
-
-    if user:
-        service = AlertService(db)
-        return await service.registrar_alerta_usuario(user.user_id, datos)
-    return {"status": "error", "message": "Usuario no encontrado"}
+# ── Health check ─────────────────────────────────────────────
+@app.get("/health", tags=["Sistema"])
+async def health_check():
+    return {
+        "status": "ok",
+        "version": settings.APP_VERSION,
+        "service": settings.PROJECT_NAME,
+    }

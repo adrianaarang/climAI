@@ -9,6 +9,8 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from app.services.normalizer_service import normalize_weather_data
+
 from app.models.database import Province, Station, Record
 from app.services.weather_ai_service import WeatherAIService
 
@@ -79,8 +81,34 @@ class WeatherAPIService:
                     "historico": hist_data,
                 }
 
+            # --- PASO 6: Guardar registro actual ---
+            try:
+                normalized = normalize_weather_data(est_aemet)
+
+                nuevo_registro = Record(
+                    timestamp=normalized["timestamp"],
+                    temperature=normalized["temperature"],
+                    humidity=normalized["humidity"],
+                    wind=normalized["wind_speed"],
+                    rain=normalized["precipitation"],
+                    station_id=estacion_db.station_id,
+                )
+
+                self.db.add(nuevo_registro)
+
+                await self.db.commit()
+
+                print(
+                    f"[weather_service] Registro guardado — "
+                    f"{nuevo_registro.temperature}°C"
+                )
+
             except Exception as e:
-                logger.exception(f"Fallo inesperado en WeatherAPIService: {e}")
+
+                print(f"[weather_service] Error guardando registro: {e}")
+
+                await self.db.rollback()
+
                 return None
 
     # --- MÉTODOS PRIVADOS DE APOYO ---
