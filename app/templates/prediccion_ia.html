@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Predicción IA · climAI{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="/static/css/prediccion.css">
+{% endblock %}
+
+{% block content %}
+<div class="app-shell">
+
+  <div id="loading-screen" class="loading-screen">
+    <div class="spinner"></div>
+    <p>Obteniendo ubicación y datos AEMET...</p>
+  </div>
+
+  <div id="prediccion-view" style="display:none;">
+    <div class="page-header">
+      <div class="eyebrow">climAI · predicción</div>
+      <h1 class="page-title">Pronóstico inteligente</h1>
+      <p class="page-sub" id="coords-display"></p>
+    </div>
+
+    <div class="dashboard-grid">
+
+      <div class="card hero-card">
+        <div class="hero-left">
+          <div class="location-label">ubicación actual</div>
+          <div class="city-name" id="city-name">—</div>
+          <div class="station-name" id="station-name">Estación AEMET más cercana</div>
+          <div class="temp-row">
+            <span class="temperature" id="temp-now">—°</span>
+            <span class="status-dot"></span>
+          </div>
+          <span class="ia-badge" id="ia-badge"></span>
+        </div>
+        <div class="hero-right">
+          <div class="weather-icon" id="weather-icon"></div>
+        </div>
+      </div>
+
+      <div class="card metrics-card">
+        <h3>Condiciones actuales</h3>
+        <div class="metrics-grid" id="metrics-grid"></div>
+      </div>
+
+      <div class="card days-card">
+        <h3>Próximos días</h3>
+        <div class="days-grid" id="days-grid"></div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-header">
+          <span class="chart-title">Probabilidad de lluvia · próximos días</span>
+          <span class="updated-at" id="updated-at"></span>
+        </div>
+        <div class="chart-wrapper">
+          <div class="bar-row" id="bar-chart"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="error-screen" class="error-screen" style="display:none;">
+    <p id="error-msg">No se pudo obtener la ubicación.</p>
+    <button onclick="location.reload()">Reintentar</button>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="/static/js/prediccion.js"></script>
+{% endblock %}
