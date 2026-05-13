@@ -1,0 +1,99 @@
+/* Card de Telegram */
+.telegram-card {
+    grid-column: span 2;
+    padding: 2rem;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.telegram-logo {
+    width: 40px;
+    height: 40px;
+}
+
+.steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.step {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.step-num {
+    background: #0088cc;
+    color: white;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.bot-link {
+    color: #0088cc;
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px dashed #0088cc;
+}
+
+/* Contenedor del Token */
+.token-container {
+    margin-top: 1rem;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    padding: 1rem;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+#syncToken {
+    font-family: 'Courier New', monospace;
+    font-size: 1.4rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #2d3436;
+}
+
+.copy-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+}
+
+.copy-btn:hover { transform: scale(1.2); }
+
+/* Estados */
+.status-badge {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.status-badge.pending { background: #fff3cd; color: #856404; }
+.status-badge.linked { background: #d4edda; color: #155724; }
+
+.btn-danger {
+    display: block;
+    margin-top: 1rem;
+    color: #e74c3c;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
