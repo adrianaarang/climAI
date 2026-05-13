@@ -23,6 +23,7 @@ joblib
 httpx
 jinja2
 requests
+pytest
 
 # Config & Environment
 python-dotenv
