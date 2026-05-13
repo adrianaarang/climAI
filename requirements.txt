@@ -22,11 +22,15 @@ joblib
 # Utilities
 httpx
 jinja2
+requests
 
 # Config & Environment
 python-dotenv
-pydantic>=2.0
+pydantic[email]>=2.0
 pydantic-settings>=2.2.0
-pydantic[email]
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
+bcrypt==4.0.1
+
+# Notifications
+aiosmtplib
