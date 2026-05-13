@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}ClimAI · Vincular Telegram{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="/static/css/vincular_telegram.css">
+{% endblock %}
+
+{% block content %}
+<header class="page-header">
+  <div class="header-left">
+    <p class="eyebrow">Notificaciones</p>
+    <h1 class="page-title">Vincular Telegram</h1>
+  </div>
+</header>
+
+<div class="dashboard-grid">
+  <!-- Sección de Instrucciones -->
+  <article class="card telegram-card">
+    <div class="card-header">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram Logo" class="telegram-logo">
+      <h3>Sigue estos pasos</h3>
+    </div>
+    
+    <div class="steps-container">
+      <div class="step">
+        <span class="step-num">1</span>
+        <div class="step-text">
+          <p>Abre Telegram y busca nuestro bot:</p>
+          <a href="https://t.me/ClimAI_Alerts_Bot" target="_blank" class="bot-link">@ClimAI_Alerts_Bot</a>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-num">2</span>
+        <div class="step-text">
+          <p>Pulsa el botón <strong>Iniciar</strong> o envía <code>/start</code>.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-num">3</span>
+        <div class="step-text">
+          <p>Copia y envía este código al chat del bot:</p>
+          <div class="token-container">
+            <span id="syncToken">{{ telegram_token }}</span>
+            <button class="copy-btn" id="copyBtn" title="Copiar código">📋</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- Sección de Estado -->
+  <article class="card status-card">
+    <h3>Estado de Conexión</h3>
+    <div class="status-content">
+      <div id="statusIndicator" class="status-badge {% if telegram_linked %}linked{% else %}pending{% endif %}">
+        {% if telegram_linked %}
+          ✅ Vinculado
+        {% else %}
+          ⏳ Pendiente de vinculación
+        {% endif %}
+      </div>
+      
+      <p class="status-desc">
+        {% if telegram_linked %}
+          Ya estás recibiendo alertas en tu dispositivo.
+        {% else %}
+          Una vez enviado el código, actualiza para confirmar.
+        {% endif %}
+      </p>
+
+      <div class="actions">
+        <button id="checkStatusBtn" class="refresh-btn">Verificar Conexión</button>
+        {% if telegram_linked %}
+          <a href="/api/auth/telegram/unlink" class="btn-danger">Desvincular Cuenta</a>
+        {% endif %}
+      </div>
+    </div>
+  </article>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="/static/js/vincular_telegram.js"></script>
+{% endblock %}
