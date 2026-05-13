@@ -1,4 +1,3 @@
-# app/routers/auth.py
 from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -19,7 +18,9 @@ def obtener_usuario_actual(request: Request) -> str | None:
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request, "usuario": None})
+    return templates.TemplateResponse(
+        request=request, name="login.html", context={"usuario": None}
+    )
 
 
 @router.post("/login")
@@ -40,23 +41,23 @@ async def login_process(
             response.set_cookie(key="usuario_login", value=user.email, httponly=True, samesite="lax")
             return response
 
-        return templates.TemplateResponse("login.html", {
-            "request": request,
-            "error": "Email o contraseña incorrectos",
-            "usuario": None,
-        })
+        return templates.TemplateResponse(
+            request=request, name="login.html",
+            context={"error": "Email o contraseña incorrectos", "usuario": None}
+        )
     except Exception as e:
         print(f"Error en Login: {e}")
-        return templates.TemplateResponse("login.html", {
-            "request": request,
-            "error": "Error interno del servidor",
-            "usuario": None,
-        })
+        return templates.TemplateResponse(
+            request=request, name="login.html",
+            context={"error": "Error interno del servidor", "usuario": None}
+        )
 
 
 @router.get("/registro_usuario", response_class=HTMLResponse)
 async def register_page(request: Request):
-    return templates.TemplateResponse("registro_usuario.html", {"request": request, "usuario": None})
+    return templates.TemplateResponse(
+        request=request, name="registro_usuario.html", context={"usuario": None}
+    )
 
 
 @router.post("/registro_usuario")
@@ -65,33 +66,31 @@ async def register_process(
     email: str = Form(...),
     password: str = Form(...),
     confirm_password: str = Form(...),
-    telegram_id: str = Form(None),  # añadido: campo opcional del formulario
+    telegram_id: str = Form(None),
     db: AsyncSession = Depends(get_db),
 ):
     email_normalizado = email.strip().lower()
 
     if password != confirm_password:
-        return templates.TemplateResponse("registro_usuario.html", {
-            "request": request,
-            "error": "Las contraseñas no coinciden",
-            "usuario": None,
-        })
+        return templates.TemplateResponse(
+            request=request, name="registro_usuario.html",
+            context={"error": "Las contraseñas no coinciden", "usuario": None}
+        )
 
     try:
         result = await db.execute(
             select(User).where(User.email == email_normalizado)
         )
         if result.scalar_one_or_none():
-            return templates.TemplateResponse("registro_usuario.html", {
-                "request": request,
-                "error": "El email ya está registrado",
-                "usuario": None,
-            })
+            return templates.TemplateResponse(
+                request=request, name="registro_usuario.html",
+                context={"error": "El email ya está registrado", "usuario": None}
+            )
 
         nuevo_usuario = User(
             email=email_normalizado,
             password=hash_password(password),
-            telegram_id=telegram_id or None,  # añadido
+            telegram_id=telegram_id or None,
         )
         db.add(nuevo_usuario)
         await db.commit()
@@ -100,11 +99,10 @@ async def register_process(
     except Exception as e:
         await db.rollback()
         print(f"Error DB: {e}")
-        return templates.TemplateResponse("registro_usuario.html", {
-            "request": request,
-            "error": "Error interno al procesar el registro",
-            "usuario": None,
-        })
+        return templates.TemplateResponse(
+            request=request, name="registro_usuario.html",
+            context={"error": "Error interno al procesar el registro", "usuario": None}
+        )
 
 
 @router.get("/logout")
