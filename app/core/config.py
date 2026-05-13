@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     AEMET_API_KEY: str = os.getenv("AEMET_API_KEY", "")
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://redis:6379/0")
 
+    TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
+
     # ── Seguridad JWT (tu responsabilidad) ───────────────
     SECRET_KEY: str = os.getenv(
         "SECRET_KEY",
