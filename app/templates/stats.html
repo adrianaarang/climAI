@@ -1,319 +1,124 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>climAI – Dashboard</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+{% extends "base.html" %}
 
-    body {
-      min-height: 100vh;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      color: #fff;
-    }
+{% block title %}ClimAI · Estadísticas Avanzadas{% endblock %}
 
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.25rem 2rem;
-      background: rgba(0,0,0,0.25);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
+{% block extra_css %}
+  <link rel="stylesheet" href="/static/css/index.css">
+  <link rel="stylesheet" href="/static/css/stats.css">
+{% endblock %}
 
-    header h1 { font-size: 1.4rem; font-weight: 700; }
-    header span { font-size: 1.6rem; margin-right: 0.4rem; }
+{% block content %}
 
-    .logout {
-      font-size: 0.8rem;
-      color: rgba(255,255,255,0.5);
-      text-decoration: none;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 0.35rem 0.8rem;
-      border-radius: 0.4rem;
-      transition: background 0.2s;
-    }
-    .logout:hover { background: rgba(255,255,255,0.1); }
+<header class="page-header">
+  <div class="eyebrow">Análisis de Datos Históricos</div>
+  <h1 class="page-title">Estadísticas del Sistema</h1>
+</header>
 
-    main {
-      max-width: 900px;
-      margin: 2.5rem auto;
-      padding: 0 1.5rem;
-    }
+<div class="dashboard-grid">
 
-    .location-bar {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 2rem;
-    }
-
-    .location-bar p {
-      font-size: 0.95rem;
-      color: rgba(255,255,255,0.65);
-    }
-
-    #btn-location {
-      padding: 0.5rem 1.1rem;
-      border-radius: 0.5rem;
-      border: 1px solid rgba(255,255,255,0.25);
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    #btn-location:hover { background: rgba(255,255,255,0.18); }
-
-    /* ── Main weather card ── */
-    .weather-card {
-      background: rgba(255,255,255,0.07);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.13);
-      border-radius: 1.25rem;
-      padding: 2rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-
-    .weather-card.hidden { display: none; }
-
-    .card-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 1.75rem;
-    }
-
-    .station-name {
-      font-size: 1.1rem;
-      font-weight: 600;
-    }
-
-    .station-sub {
-      font-size: 0.8rem;
-      color: rgba(255,255,255,0.5);
-      margin-top: 0.2rem;
-    }
-
-    .weather-icon { font-size: 4rem; line-height: 1; }
-
-    .temp-big {
-      font-size: 4.5rem;
-      font-weight: 700;
-      letter-spacing: -2px;
-      line-height: 1;
-    }
-
-    .temp-big sup { font-size: 1.8rem; font-weight: 400; vertical-align: super; }
-
-    /* ── Metric grid ── */
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 1rem;
-    }
-
-    .metric {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 0.9rem;
-      padding: 1rem 1.1rem;
-    }
-
-    .metric .label {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: rgba(255,255,255,0.5);
-      margin-bottom: 0.35rem;
-    }
-
-    .metric .value {
-      font-size: 1.6rem;
-      font-weight: 700;
-    }
-
-    .metric .unit {
-      font-size: 0.8rem;
-      color: rgba(255,255,255,0.55);
-      margin-left: 0.15rem;
-    }
-
-    .metric .icon { font-size: 1.2rem; margin-bottom: 0.3rem; }
-
-    /* ── States ── */
-    .state {
-      text-align: center;
-      padding: 3rem 1rem;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 1.25rem;
-    }
-
-    .state .big { font-size: 2.5rem; margin-bottom: 0.5rem; }
-    .state p { color: rgba(255,255,255,0.6); font-size: 0.95rem; }
-
-    #state-error .big { filter: grayscale(1); }
-
-    .spinner {
-      width: 40px; height: 40px;
-      border: 3px solid rgba(255,255,255,0.15);
-      border-top-color: #5eead4;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 1rem;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    footer {
-      text-align: center;
-      padding: 2rem;
-      font-size: 0.75rem;
-      color: rgba(255,255,255,0.25);
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <div style="display:flex;align-items:center">
-      <span>🌤️</span>
-      <h1>climAI</h1>
-    </div>
-    <a class="logout" href="/">Cerrar sesión</a>
-  </header>
-
-  <main>
-    <div class="location-bar">
-      <p id="location-text">Detectando tu ubicación…</p>
-      <button id="btn-location">📍 Actualizar</button>
-    </div>
-
-    <!-- Loading -->
-    <div class="state" id="state-loading">
-      <div class="spinner"></div>
-      <p>Obteniendo datos meteorológicos…</p>
-    </div>
-
-    <!-- Error -->
-    <div class="state hidden" id="state-error">
-      <div class="big">⚠️</div>
-      <p id="error-msg">No se pudo obtener el clima.</p>
-    </div>
-
-    <!-- Weather card -->
-    <div class="weather-card hidden" id="weather-card">
-      <div class="card-header">
-        <div>
-          <div class="station-name" id="station-name">—</div>
-          <div class="station-sub" id="station-sub">Estación AEMET</div>
-        </div>
-        <div>
-          <div class="weather-icon" id="weather-icon">🌡️</div>
-          <div class="temp-big" id="temp">—<sup>°C</sup></div>
-        </div>
+  <article class="card metrics-card">
+    <h3 class="card-label">Resumen global</h3>
+    <div class="metrics-grid">
+      <div class="metric-box">
+        <p class="metric-label">Media nacional</p>
+        <p class="metric-value">{{ stats.media_nacional }}°</p>
       </div>
-
-      <div class="metrics">
-        <div class="metric">
-          <div class="icon">💧</div>
-          <div class="label">Humedad</div>
-          <div class="value" id="humedad">—<span class="unit">%</span></div>
-        </div>
-        <div class="metric">
-          <div class="icon">💨</div>
-          <div class="label">Viento</div>
-          <div class="value" id="viento">—<span class="unit">km/h</span></div>
-        </div>
-        <div class="metric">
-          <div class="icon">🌧️</div>
-          <div class="label">Precipitación</div>
-          <div class="value" id="lluvia">—<span class="unit">mm</span></div>
-        </div>
+      <div class="metric-box">
+        <p class="metric-label">Máxima registrada</p>
+        <p class="metric-value">{{ stats.max_historica }}°</p>
+      </div>
+      <div class="metric-box">
+        <p class="metric-label">Correlación Hum/Temp</p>
+        <p class="metric-value">{{ stats.correlacion_hum_temp }}</p>
+      </div>
+      <div class="metric-box">
+        <p class="metric-label">Provincias analizadas</p>
+        <p class="metric-value">{{ stats.labels_provincias | length }}</p>
       </div>
     </div>
-  </main>
+  </article>
 
-  <footer>climAI · Datos: AEMET OpenData</footer>
+  <article class="card extremos-card">
+    <h3 class="card-label">Extremos por provincia</h3>
+    <div class="extremos-grid">
+      <div class="extremo-box extremo-calor">
+        <p class="extremo-label">🌡️ Más cálida</p>
+        <p class="extremo-nombre">{{ stats.provincia_top_calor }}</p>
+        <p class="extremo-temp">{{ stats.temp_max_provincia }}°C media</p>
+      </div>
+      <div class="extremo-box extremo-frio">
+        <p class="extremo-label">❄️ Más fría</p>
+        <p class="extremo-nombre">{{ stats.provincia_top_frio }}</p>
+        <p class="extremo-temp">{{ stats.temp_min_provincia }}°C media</p>
+      </div>
+    </div>
+  </article>
 
-  <script>
-    const ICONS = {
-      sunny:   '☀️',
-      cloudy:  '⛅',
-      rainy:   '🌧️',
-      night:   '🌙',
-      windy:   '🌬️',
-    };
+  <article class="card chart-card" style="grid-column: 1 / -1;">
+    <div class="chart-header">
+      <p class="chart-title">Temperatura media por provincia · todas</p>
+      <div class="chart-tabs">
+        <button class="chart-tab active" id="tabBar">Barras</button>
+        <button class="chart-tab" id="tabLine">Línea</button>
+      </div>
+    </div>
+    <div class="chart-wrapper" style="height: 320px;">
+      <canvas id="provinciasChart"></canvas>
+    </div>
+  </article>
 
-    function weatherIcon(data) {
-      if (data.es_noche) return ICONS.night;
-      if (data.lluvia > 1) return ICONS.rainy;
-      if (data.viento > 40) return ICONS.windy;
-      if (data.humedad > 80) return ICONS.cloudy;
-      return ICONS.sunny;
-    }
+  <article class="card" style="grid-column: 1 / -1;">
+    <h3 class="card-label">
+      Detalle por provincia · {{ stats.labels_provincias | length }} registradas
+    </h3>
+    <div class="stats-table-wrapper">
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Provincia</th>
+            <th>Temperatura media</th>
+            <th>Ranking</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in range(stats.labels_provincias | length) %}
+          <tr>
+            <td class="rank-num">{{ i + 1 }}</td>
+            <td>{{ stats.labels_provincias[i] }}</td>
+            <td class="mono">
+              {% if stats.temp_por_provincia[i] is not none %}
+                {{ stats.temp_por_provincia[i] }}°C
+              {% else %}
+                <span class="sin-datos">Sin datos</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="rank-bar-wrap">
+                <div class="rank-bar"
+                  data-temp="{{ stats.temp_por_provincia[i] or 0 }}"
+                  data-max="{{ stats.max_historica if stats.max_historica != '—' else 0 }}">
+                </div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
 
-    function show(id) {
-      ['state-loading', 'state-error', 'weather-card'].forEach(s => {
-        document.getElementById(s).classList.add('hidden');
-      });
-      document.getElementById(id).classList.remove('hidden');
-    }
+</div>
 
-    function renderWeather(data) {
-      document.getElementById('station-name').textContent = data.ciudad || data.estacion || '—';
-      document.getElementById('weather-icon').textContent = weatherIcon(data);
-      document.getElementById('temp').innerHTML = `${data.temperatura.toFixed(1)}<sup>°C</sup>`;
-      document.getElementById('humedad').innerHTML = `${data.humedad.toFixed(0)}<span class="unit">%</span>`;
-      document.getElementById('viento').innerHTML = `${data.viento.toFixed(1)}<span class="unit">km/h</span>`;
-      document.getElementById('lluvia').innerHTML = `${data.lluvia.toFixed(1)}<span class="unit">mm</span>`;
-      show('weather-card');
-    }
+<div id="stats-data"
+  data-labels='{{ stats.labels_provincias | tojson }}'
+  data-values='{{ stats.temp_por_provincia | tojson }}'
+  data-max='{{ stats.max_historica if stats.max_historica != "—" else 0 }}'
+  style="display:none;">
+</div>
 
-    async function fetchClima(lat, lon) {
-      show('state-loading');
-      try {
-        const res = await fetch(`/api/v1/clima/?lat=${lat}&lon=${lon}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        renderWeather(data);
-      } catch (err) {
-        document.getElementById('error-msg').textContent =
-          'No se pudieron obtener los datos meteorológicos. Inténtalo de nuevo.';
-        show('state-error');
-      }
-    }
+{% endblock %}
 
-    function geolocate() {
-      if (!navigator.geolocation) {
-        document.getElementById('location-text').textContent = 'Geolocalización no disponible';
-        document.getElementById('error-msg').textContent = 'Tu navegador no soporta geolocalización.';
-        show('state-error');
-        return;
-      }
-
-      document.getElementById('location-text').textContent = 'Detectando ubicación…';
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude: lat, longitude: lon } = pos.coords;
-          document.getElementById('location-text').textContent =
-            `📍 ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-          fetchClima(lat, lon);
-        },
-        () => {
-          document.getElementById('location-text').textContent = 'No se pudo acceder a la ubicación';
-          document.getElementById('error-msg').textContent =
-            'Activa los permisos de ubicación en tu navegador y pulsa "Actualizar".';
-          show('state-error');
-        },
-        { timeout: 8000 }
-      );
-    }
-
-    document.getElementById('btn-location').addEventListener('click', geolocate);
-    geolocate();
-  </script>
-</body>
-</html>
+{% block extra_js %}
+  <script src="/static/js/stats.js"></script>
+{% endblock %}

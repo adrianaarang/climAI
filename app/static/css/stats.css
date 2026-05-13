@@ -1,0 +1,48 @@
+/* ── Extremos ── */
+.extremos-card {
+  grid-column: 1 / -1;
+}
+
+.extremos-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.extremo-box {
+  border-radius: var(--radius-sm);
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+}
+
+.extremo-calor {
+  background: rgba(245, 158, 11, 0.06);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.extremo-frio {
+  background: rgba(56, 189, 248, 0.06);
+  border-color: rgba(56, 189, 248, 0.2);
+}
+
+.extremo-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+
+.extremo-nombre {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.extremo-temp {
+  font-size: 0.875rem;
+  font-family: var(--mono);
+  color: var(--muted);
+}
