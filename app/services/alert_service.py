@@ -1,34 +1,46 @@
-import logging
 from typing import Dict, Any, List
 
-try:
-    from utils.validators import validate_weather_data
-except ImportError:
-    logger = logging.getLogger(__name__)
-    logger.warning("No se pudo importar 'validate_weather_data'. Usando validador temporal.")
+# 1. Importamos el validador de pydatntic que tenemos en schemas
+from app.schemas.registro import RecordCreate
+from pydantic import ValidationError
 
-    def validate_weather_data(data: Dict[str, Any]) -> bool:
-        return True
+# 2. Importamos funciones de logging personalizadas
+from app.services.logging_service import log_error, log_warning, log_info
 
 class AlertService:
     """Motor de análisis de riesgos climáticos y generación de alertas."""
 
     def evaluar_alertas(self, registro_normalizado: Dict[str, Any]) -> List[str]:
-
-        if not validate_weather_data(registro_normalizado):
+        """
+        Analiza los datos meteorológicos usando la validación de RecordCreate
+        y registra cualquier anomalía en el sistema de logs.
+        """
+        
+        # --- VALIDACIÓN REAL CON PYDANTIC ---
+        try:
+            # Usamos el esquema oficial para validar rangos (temp -50 a 60, etc.)
+            RecordCreate(**registro_normalizado)
+        except (ValidationError, TypeError, ValueError) as e:
+            # Usamos función de log_error para guardar el fallo en logs
+            log_error(f"Validación fallida en AlertService: {e}")
             return []
 
         alertas = []
 
+        # --- EXTRACCIÓN DE DATOS ---
         try:
-            temp = float(registro_normalizado.get("temperatura", 0.0))
-            viento = float(registro_normalizado.get("viento", 0.0))
-            lluvia = float(registro_normalizado.get("lluvia", 0.0))
-            humedad = float(registro_normalizado.get("humedad", 0.0))
+            # Extraemos datos usando las claves en inglés del RecordBase
+            temp = float(registro_normalizado.get("temperature", 0.0))
+            lluvia = float(registro_normalizado.get("rain", 0.0))
+            humedad = float(registro_normalizado.get("humidity", 0.0))
+            viento = float(registro_normalizado.get("wind", 0.0)) 
 
-        except (TypeError, ValueError):
+        except (TypeError, ValueError) as e:
+            log_error(f"Error de formato numérico en AlertService: {e}")
             return []
 
+        # --- LÓGICA DE UMBRALES DE RIESGO ---
+        
         # TEMPERATURA
         if temp >= 40.0:
             alertas.append("ROJA_CALOR")
@@ -55,8 +67,11 @@ class AlertService:
         if humedad >= 90:
             alertas.append("NARANJA_HUMEDAD")
 
-        # Si no hay ninguna alerta, devolvemos verde general
+        # --- RESULTADO FINAL ---
         if not alertas:
             alertas.append("VERDE")
+        else:
+            # Opcional: Registrar que se han generado alertas
+            log_info(f"Alertas generadas para el registro: {alertas}")
 
         return alertas
