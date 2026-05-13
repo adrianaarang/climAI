@@ -51,7 +51,6 @@ app.include_router(provincias_router)
 app.include_router(views_router)
 
 # ── API Clima (index.html) ─────────────────────────────────────────────────────
-# Este endpoint lo usa el dashboard principal — devuelve datos actuales + histórico + IA
 try:
     from app.services.weather_service import obtener_clima_cercano
     from app.services.weather_ai_service import WeatherAIService
@@ -69,7 +68,6 @@ try:
             if not raw:
                 return {"error": "No hay datos"}
 
-            # La IA se llama aquí igual que en predict.py
             ai = WeatherAIService()
             pronostico_ia = ai.obtener_prediccion(
                 temp=raw.get("temperatura", 0),
@@ -86,6 +84,7 @@ try:
                 "es_noche":        raw.get("es_noche", False),
                 "historico":       raw.get("historico"),
                 "pronostico_ia":   pronostico_ia,
+                "alertas":         raw.get("alertas", []),
             }
         except Exception as e:
             print(f"[main /api/clima] Error: {e}")

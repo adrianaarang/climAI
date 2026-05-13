@@ -11,13 +11,13 @@ function actualizarIconoVisual(data) {
 
   if (data.es_noche) sun.classList.add("is-night");
 
-  const temp = Math.round(data.temperature ?? 0);
+  const temp = Math.round(data.temperatura ?? 0);
   if (temp <= 12)      sun.classList.add("temp-cold");
   else if (temp >= 28) sun.classList.add("temp-hot");
 
-  const lluvia = data.precipitation || 0;
+  const lluvia = data.precipitacion || 0;
   if (lluvia > 0)              crearNube(container, true);
-  else if (data.humidity > 75) crearNube(container, false);
+  else if (data.humedad > 75)  crearNube(container, false);
 }
 
 function crearNube(parent, conLluvia) {
@@ -140,7 +140,6 @@ function refrescarGraficaActiva() {
 }
 
 // ─── LEER PARÁMETROS DE LA URL ────────────────────────────────────
-// Cuando venimos desde weather_province, la URL trae ?lat=X&lon=Y&ciudad=Nombre
 function leerParamsURL() {
   const params = new URLSearchParams(window.location.search);
   const lat    = params.get("lat");
@@ -156,11 +155,9 @@ function leerParamsURL() {
 async function actualizarClima() {
   setText("updatedAt", "Localizando...");
 
-  // ¿Venimos de la selección de provincia?
   const paramsURL = leerParamsURL();
 
   if (paramsURL) {
-    // Usamos las coordenadas de la URL directamente
     const { lat, lon, ciudad } = paramsURL;
     if (ciudad) {
       setText("mainTitle", `${ciudad} · Tiempo Real`);
@@ -168,7 +165,6 @@ async function actualizarClima() {
     }
     await fetchYActualizar(lat, lon);
   } else {
-    // Flujo normal: pedimos GPS al navegador
     if (!navigator.geolocation) {
       setText("updatedAt", "GPS no soportado");
       return;
@@ -188,23 +184,26 @@ async function fetchYActualizar(latitude, longitude) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? "Error de servidor");
 
-    setText("temperature", `${Math.round(data.temperature)}°`);
-    setText("humidity",    `${data.humidity}%`);
-    setText("wind",        `${data.wind_speed} km/h`);
-    setText("rain",        data.precipitation > 0 ? `${data.precipitation} mm` : "Sin lluvia");
+    // ── Datos actuales ───────────────────────────────────────────
+    setText("temperature", `${Math.round(data.temperatura)}°`);
+    setText("humidity",    `${data.humedad}%`);
+    setText("wind",        `${data.viento} km/h`);
+    setText("rain",        data.precipitacion > 0 ? `${data.precipitacion} mm` : "Sin lluvia");
     setText("stationName", data.estacion_nombre || "Estación AEMET");
 
-    // Solo sobreescribimos ciudad/título si no venían ya de la URL
+    // ── Ciudad / título ──────────────────────────────────────────
     if (!leerParamsURL()) {
       setText("cityName",  data.ciudad_buscada || "Tu Ubicación");
       setText("mainTitle", `${data.ciudad_buscada || "Clima"} · Tiempo Real`);
     }
 
+    // ── Timestamp ────────────────────────────────────────────────
     const horaActual = new Date().toLocaleTimeString("es-ES", {
       hour: "2-digit", minute: "2-digit",
     });
     setText("updatedAt", `Actualizado a las ${horaActual}`);
 
+    // ── Histórico → gráfica ──────────────────────────────────────
     if (data.historico) {
       datosCache.horas    = data.historico.horas;
       datosCache.temps    = data.historico.temperature;
@@ -213,6 +212,28 @@ async function fetchYActualizar(latitude, longitude) {
       refrescarGraficaActiva();
     }
 
+    // ── Predicción IA ────────────────────────────────────────────
+    if (data.pronostico_ia) {
+      setText("pred-temp",  `${data.pronostico_ia.temperatura}°C`);
+      setText("trend-text",  data.pronostico_ia.tendencia);
+
+      const trendIcon = document.getElementById("trend-icon");
+      if (trendIcon) {
+        const tend = data.pronostico_ia.tendencia.toLowerCase();
+        if (tend.includes("ascenso")) {
+          trendIcon.textContent = "↑";
+          trendIcon.style.color = "#ff5f5f";
+        } else if (tend.includes("descenso")) {
+          trendIcon.textContent = "↓";
+          trendIcon.style.color = "#5fb8ff";
+        } else {
+          trendIcon.textContent = "→";
+          trendIcon.style.color = "#888";
+        }
+      }
+    }
+
+    // ── Icono visual + status ────────────────────────────────────
     actualizarIconoVisual(data);
     setStatus(true);
 
