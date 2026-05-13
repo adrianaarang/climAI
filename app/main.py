@@ -107,6 +107,9 @@ try:
         if user:
             service = AlertService(db)
             return await service.crear_alerta(user, datos)
+        
 
 except ImportError as e:
     print(f"[main] alert_service no disponible: {e}")
+
+    
