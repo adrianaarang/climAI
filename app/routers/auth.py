@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+import uuid  # Para generar el token de vinculación
 
 from app.db.session import get_db
 from app.models.database import User
@@ -11,17 +12,45 @@ from app.core.security import hash_password, verify_password
 router = APIRouter(tags=["Autenticación"])
 templates = Jinja2Templates(directory="app/templates")
 
-
+# --- FUNCIONES DE APOYO ---
 def obtener_usuario_actual(request: Request) -> str | None:
     return request.cookies.get("usuario_login")
 
+async def buscar_usuario_por_email(db: AsyncSession, email: str) -> User | None:
+    result = await db.execute(select(User).where(User.email == email))
+    return result.scalar_one_or_none()
+
+# --- RUTAS DE TELEGRAM (Lo que faltaba) ---
+
+@router.get("/vincular_telegram", response_class=HTMLResponse)
+async def vincular_telegram_page(request: Request, db: AsyncSession = Depends(get_db)):
+    email = obtener_usuario_actual(request)
+    if not email:
+        return RedirectResponse(url="/login")
+    
+    user = await buscar_usuario_por_email(db, email)
+    
+    # Si el usuario no tiene un token de sincronización, le creamos uno temporal
+    # Esto es lo que aparecerá en tu HTML como {{ telegram_token }}
+    sync_token = str(uuid.uuid4())[:8].upper() 
+    
+    return templates.TemplateResponse(
+        request=request, 
+        name="vincular_telegram.html", 
+        context={
+            "usuario": email,
+            "telegram_token": sync_token,
+            "telegram_linked": user.telegram_id is not None
+        }
+    )
+
+# --- RUTAS DE LOGIN Y REGISTRO (Tus rutas originales corregidas) ---
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     return templates.TemplateResponse(
         request=request, name="login.html", context={"usuario": None}
     )
-
 
 @router.post("/login")
 async def login_process(
@@ -31,10 +60,7 @@ async def login_process(
     db: AsyncSession = Depends(get_db),
 ):
     try:
-        result = await db.execute(
-            select(User).where(User.email == email.strip().lower())
-        )
-        user = result.scalar_one_or_none()
+        user = await buscar_usuario_por_email(db, email.strip().lower())
 
         if user and verify_password(password, user.password):
             response = RedirectResponse(url="/", status_code=303)
@@ -52,13 +78,11 @@ async def login_process(
             context={"error": "Error interno del servidor", "usuario": None}
         )
 
-
 @router.get("/registro_usuario", response_class=HTMLResponse)
 async def register_page(request: Request):
     return templates.TemplateResponse(
         request=request, name="registro_usuario.html", context={"usuario": None}
     )
-
 
 @router.post("/registro_usuario")
 async def register_process(
@@ -78,10 +102,7 @@ async def register_process(
         )
 
     try:
-        result = await db.execute(
-            select(User).where(User.email == email_normalizado)
-        )
-        if result.scalar_one_or_none():
+        if await buscar_usuario_por_email(db, email_normalizado):
             return templates.TemplateResponse(
                 request=request, name="registro_usuario.html",
                 context={"error": "El email ya está registrado", "usuario": None}
@@ -104,9 +125,10 @@ async def register_process(
             context={"error": "Error interno al procesar el registro", "usuario": None}
         )
 
-
 @router.get("/logout")
 async def logout():
     response = RedirectResponse(url="/", status_code=303)
     response.delete_cookie("usuario_login")
     return response
+
+
