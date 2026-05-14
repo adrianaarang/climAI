@@ -659,6 +659,38 @@ celery -A app.core.celery_app worker --loglevel=info
 pytest tests/
 ```
 
+## 🔌 API REST
+
+| Endpoint | Método | Descripción | Auth |
+|---|---|---|---|
+| `/api/clima` | GET | Datos actuales + histórico | ❌ |
+| `/api/v1/predict` | GET | Predicción IA + pronóstico | ✅ |
+| `/api/v1/auth/token` | POST | Login JWT | ❌ |
+| `/api/provinces` | GET | Lista provincias | ❌ |
+| `/api/alertas/crear` | POST | Crear alerta personalizada | ✅ |
+
+## 📦 Ejemplo de Respuesta
+
+```bash
+curl "http://localhost:8000/api/clima?lat=40.4168&lon=-3.7038"
+```
+
+```json
+{
+  "temperatura": 22.4,
+  "humedad": 58.0,
+  "viento": 12.3,
+  "precipitacion": 0.0,
+  "estacion_nombre": "Madrid, Retiro",
+  "ciudad_buscada": "madrid",
+  "es_noche": false,
+  "pronostico_ia": {
+    "temperatura": 23.1,
+    "tendencia": "En ascenso"
+  }
+}
+```
+
 ---
 # 🛡️ Evaluación Ética y Gobernanza del Dato
 
