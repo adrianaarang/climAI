@@ -428,94 +428,149 @@ Celery + Redis → Alertas → Telegram Bot API
 ## 📁 Estructura del Proyecto
 ```text
 climAI/
-
-├── app/
-│   ├──  api/v1/
-│   │           ├── endpoints/
-│   │           │        ├── predict.py
-│   │           │        └── auth_jwt.py
-│   │           │        └── climas.py   
-│   │           │        └── stats.py    
-│   │           └── api_router.py
-│   │
-│   ├── core/
-│   │       ├── resources/
-│   │       │           ├── estaciones_madrid.json
-│   │       │           └── municipios.json
-│   │       ├── celery_app.py
-│   │       ├── config.py
-│   │       └── security.py
-│   │
-│   ├── db/
-│   │    ├── base_class.py
-│   │    ├── base.py
-│   │    └── session.py
-│   │
-│   ├── models/
-│   │    └── database.py
-│   │
-│   ├── routers/
-│   │   ├── auth.py
-│   │   ├── provincias.py
-│   │   └── views.py
-│   │
-│   ├── schemas/
-│   │   ├── registro.py
-│   │   ├── stats.py
-│   │   └── token.py
-│   │
-│   ├── scripts/
-│   │   └── retrain_model.py
-│   │
-│   ├── services/
-│   │    ├── aemet_client.py
-│   │    ├── alert_service.py
-│   │    ├── geo_utils.py
-│   │    ├── logging_service.py
-│   │    │── ml_engine.py
-│   │    ├── normalizer_service.py
-│   │    ├── notifier_service.py
-│   │    ├── stats_service.py
-│   │    ├── telegram_bot.py
-│   │    ├── weather_ai_service.py
-│   │    └── weather_service.py
-│   │
-│   ├── static/
-│   │    ├── css/
-│   │    └── js/
-│   │
-├── templates/
-│
-└── main.py
-└── logs
-│
-├── alembic/
-│       └── versions/
-│
-├── docker/
-│   ├── Dockerfile
-│   └── docker-compose.yml
-│
-├── ml_models/
-│   └── modelo_clima.pkl
-│
-├── tests/
-│   ├── test_api.py
-│   └── test_celery.py
-│   └── test_normalizer.py
-│
-├── worker/
-│   ├── tasks.py
-│
-├── .env
-├── .env.example
-├── .gitignore
-└── alembic.ini
-└── Dockerfile
-└── README.md
-└── requirements.txt
-
-
+│   logs
+│   main.py
+│   __init__.py
+│   
+├───api
+│   │   __init__.py
+│   │   
+│   ├───v1
+│   │   │   api_router.py
+│   │   │   __init__.py
+│   │   │   
+│   │   ├───endpoints
+│   │   │   │   auth_jwt.py
+│   │   │   │   climas.py
+│   │   │   │   predict.py
+│   │   │   │   stats.py
+│   │   │   │   
+│   │   │   └───__pycache__
+│   │   │           auth_jwt.cpython-313.pyc
+│   │   │           predict.cpython-313.pyc
+│   │   │           
+│   │   └───__pycache__
+│   │           __init__.cpython-313.pyc
+│   │           
+│   └───__pycache__
+│           __init__.cpython-313.pyc
+│           
+├───core
+│   │   celery_app.py
+│   │   config.py
+│   │   security.py
+│   │   __init__.py
+│   │   
+│   ├───resources
+│   └───__pycache__
+│           config.cpython-313.pyc
+│           security.cpython-313.pyc
+│           __init__.cpython-313.pyc
+│           
+├───db
+│   │   base.py
+│   │   base_class.py
+│   │   session.py
+│   │   __init__.py
+│   │   
+│   └───__pycache__
+│           base_class.cpython-313.pyc
+│           session.cpython-313.pyc
+│           __init__.cpython-313.pyc
+│           
+├───models
+│   │   database.py
+│   │   __init__.py
+│   │   
+│   └───__pycache__
+│           database.cpython-313.pyc
+│           __init__.cpython-313.pyc
+│           
+├───routers
+│   │   auth.py
+│   │   provincias.py
+│   │   views.py
+│   │   
+│   └───__pycache__
+│           auth.cpython-313.pyc
+│           provincias.cpython-313.pyc
+│           views.cpython-313.pyc
+│           
+├───schemas
+│   │   registro.py
+│   │   stats.py
+│   │   token.py
+│   │   __init__.py
+│   │   
+│   └───__pycache__
+│           registro.cpython-313.pyc
+│           token.cpython-313.pyc
+│           __init__.cpython-313.pyc
+│           
+├───scripts
+│   │   retrain_model.py
+│   │   
+│   └───__pycache__
+│           retrain_model.cpython-313.pyc
+│           
+├───services
+│   │   aemet_client.py
+│   │   alert_service.py
+│   │   geo_utils.py
+│   │   logging_service.py
+│   │   ml_engine.py
+│   │   normalizer_service.py
+│   │   notifier_service.py
+│   │   stats_service.py
+│   │   weather_ai_service.py
+│   │   weather_service.py
+│   │   __init__.py
+│   │   
+│   └───__pycache__
+│           aemet_client.cpython-313.pyc
+│           alert_service.cpython-313.pyc
+│           geo_utils.cpython-313.pyc
+│           logging_service.cpython-313.pyc
+│           stats_service.cpython-313.pyc
+│           weather_ai_service.cpython-313.pyc
+│           weather_service.cpython-313.pyc
+│           __init__.cpython-313.pyc
+│           
+├───static
+│   ├───css
+│   │       alertas.css
+│   │       auth.css
+│   │       base.css
+│   │       index.css
+│   │       prediccion.css
+│   │       stats.css
+│   │       vincular_telegram.css
+│   │       
+│   └───js
+│           alertas.js
+│           auth.js
+│           base.js
+│           index.js
+│           prediccion.js
+│           stats.js
+│           vincular_telegram.js
+│           weather_province.js
+│           
+├───templates
+│       alertas.html
+│       base.html
+│       index.html
+│       login.html
+│       prediccion_ia.html
+│       registro_usuario.html
+│       stats.html
+│       vincular_telegram.html
+│       weather_province.html
+│       
+└───__pycache__
+        main.cpython-313.pyc
+        __init__.cpython-313.pyc
+        
 ```
 
 ## 🏛️ Decisiones de Arquitectura
