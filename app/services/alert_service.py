@@ -1,11 +1,13 @@
 from typing import Dict, Any, List
+import asyncio  # <--- NUEVO: Para enviar el mensaje sin bloquear la app
 
 # 1. Importamos el validador de pydatntic que tenemos en schemas
 from app.schemas.registro import RecordCreate
 from pydantic import ValidationError
 
-# 2. Importamos funciones de logging personalizadas
+# 2. Importamos funciones de logging personalizadas y el nuevo notificador
 from app.services.logging_service import log_error, log_warning, log_info
+from app.services.notifier_service import notifier_service  # <--- NUEVO
 
 class AlertService:
     """Motor de análisis de riesgos climáticos y generación de alertas."""
@@ -67,6 +69,22 @@ class AlertService:
         if humedad >= 90:
             alertas.append("NARANJA_HUMEDAD")
 
+        # --- CONEXIÓN CON TELEGRAM (La parte nueva) ---
+        for alerta in alertas:
+            if "ROJA" in alerta:
+                if chat_id:
+                    # Ordenamos al mensajero que envíe la alerta roja
+                    asyncio.create_task(
+                        notifier_service.notify_critical_alert(
+                            chat_id=chat_id,
+                            city=ciudad,
+                            temp=temp,
+                            alert_type=alerta
+                        )
+                    )
+                else:
+                    log_warning(f"Alerta {alerta} detectada pero no hay telegram_chat_id.")
+
         # --- RESULTADO FINAL ---
         if not alertas:
             alertas.append("VERDE")
@@ -75,3 +93,4 @@ class AlertService:
             log_info(f"Alertas generadas para el registro: {alertas}")
 
         return alertas
+    
