@@ -5,6 +5,7 @@ Aplicación web de meteorología inteligente que combina datos en tiempo real de
 ---
 # Más documentación: 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/adrianaarang/climAI)
+<a href="https://deepwiki.com/adrianaarang/climAI"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 # 🚀 Características principales
 
 ## 🌍 Dashboard meteorológico en tiempo real
