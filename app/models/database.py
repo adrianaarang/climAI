@@ -74,8 +74,7 @@ class User(Base):
     user_id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
-    telegram_id = Column(String, nullable=True)git add app/models.py
-    telegram_sync_token = Column(String, unique=True, index=True, nullable=True)
+    telegram_id = Column(String)
     
     notifications = relationship("SentAlert", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
 

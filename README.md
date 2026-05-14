@@ -1,41 +1,78 @@
-# climAI 🌤  Predicción Meteorológica Inteligente
+# climAI 🌤
 
-**climAI** es una aplicación web de meteorología avanzada que combina datos en tiempo real de la API de **AEMET** con modelos de **Machine Learning** para ofrecer predicciones climáticas personalizadas y un sistema de alertas asíncronas vía Telegram.
----
-
-![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-![PostgreSQL](https://img.shields.io/badge/postgresql-%23336791.svg?style=for-the-badge&logo=postgresql&logoColor=white)
-![Celery](https://img.shields.io/badge/celery-37814A?style=for-the-badge&logo=celery&logoColor=white)
-![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+Aplicación web de meteorología inteligente que combina datos en tiempo real de la API de AEMET con modelos de Machine Learning para ofrecer predicciones climáticas personalizadas por ubicación geográfica.
 
 ---
-
+# Más documentación: 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/adrianaarang/climAI)
 # 🚀 Características principales
 
-## 🌍  Dashboard Meteorológico
-* ** Detección automática de la ubicación del usuario mediante Nominatim, mostrando temperatura, humedad, viento, precipitación y el histórico de las últimas 24h de la estación AEMET más cercana.
+## 🌍 Dashboard meteorológico en tiempo real
+
+Detecta automáticamente la ubicación del usuario y muestra:
+
+- Temperatura actual
+- Humedad relativa
+- Velocidad del viento
+- Precipitación
+- Estación meteorológica AEMET más cercana
+- Histórico climático de las últimas 24h
+
+---
 
 ## 🧠 Predicción IA
-* ** Modelo de Regresión Lineal Multivariable (scikit-learn) que ajusta la temperatura actual, detecta tendencias térmicas (📈 Ascenso, ➖ Estable, 📉 Descenso) y mejora progresivamente con el reentrenamiento automático.
+
+Incluye un modelo de regresión lineal entrenado con datos históricos almacenados en PostgreSQL.
+
+El sistema:
+
+- Ajusta la temperatura actual usando Machine Learning
+- Detecta tendencias térmicas:
+  - 📈 En ascenso
+  - ➖ Estable
+  - 📉 En descenso
+- Mejora progresivamente conforme se acumulan datos reales
+
+---
 
 ## 📅 Pronóstico inteligente de 5 días
-* ** Consumo del endpoint municipal de AEMET con correcciones predictivas aplicadas por nuestro motor de IA.
 
-## 🚨 Alertas climáticas
-* Sistema de Alertas por Telegram:** Configuración personalizada de alertas climáticas (temperatura máxima/mínima, lluvia, viento). 
-El motor asíncrono evalúa las condiciones y envía notificaciones automáticas al usuario mediante un Bot de Telegram.
+Consume el endpoint municipal de predicción de AEMET y aplica una corrección basada en el modelo IA para generar pronósticos más ajustados.
+
+---
 
 ## 📊 Estadísticas avanzadas
-* ** Visualización interactiva con Chart.js de:
+
+Visualización en tiempo real de:
+
 - Temperatura media de todas las provincias españolas
 - Ranking climático nacional
 - Gráficas comparativas
 - Correlación humedad ↔ temperatura
 - Tendencias por provincias
 
-## ⚙️ Arquitectura asíncronas
-* ** Integración de Celery y Redis para el procesamiento en segundo plano (reentrenamiento del modelo, evaluación de alertas y envío de mensajería) sin bloquear el servidor web.
+---
+
+## 🚨 Alertas climáticas
+
+Sistema configurable de alertas personalizadas:
+
+- Temperatura máxima/mínima
+- Humedad
+- Lluvia
+- Viento
+
+Con envío automático de notificaciones mediante Telegram Bot API.
+
+---
+
+## 🔍 Búsqueda por provincia
+
+Permite consultar el tiempo de cualquier provincia española sin necesidad de geolocalización.
+
+---
+
+## ⚙️ Tareas asíncronas
 
 Celery gestiona procesos en background:
 
@@ -43,23 +80,6 @@ Celery gestiona procesos en background:
 - Evaluación periódica de alertas
 - Envío de notificaciones Telegram
 - Procesamiento desacoplado de tareas pesadas
-
-## 🔍 Búsqueda por provincia (geolocalización)
-
-Permite consultar el tiempo de cualquier provincia española sin necesidad de geolocalización.
-
----
-
-## 🧩 Stack Tecnológico
-
-| Capa | Tecnologías |
-| :--- | :--- |
-| **Backend & API** | FastAPI, Uvicorn, SQLAlchemy Async, Alembic, Python-dotenv |
-| **Data & IA** | PostgreSQL, scikit-learn, Pandas, NumPy, Joblib |
-| **Tareas Async** | Celery, Redis |
-| **Integraciones** | AEMET OpenData API, Telegram Bot API, OpenStreetMap (Nominatim) |
-| **Frontend** | HTML5, CSS3, Vanilla JavaScript, Jinja2, Chart.js |
-| **Infraestructura** | Docker, Docker Compose |
 
 ---
 
@@ -86,9 +106,25 @@ Weather Service ──► ML Engine
                      ▼
              Predicción IA
 
+Celery + Redis
+     │
+     ├── Reentrenamiento automático
+     ├── Evaluación de alertas
+     └── Notificaciones Telegram
 ```
 
----
+## 🧩 Stack Tecnológico
+
+| Backend & APIs | Data & IA | Frontend & DevOps |
+|---|---|---|
+| ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) | ![PostgreSQL](https://img.shields.io/badge/postgresql-%23336791.svg?style=for-the-badge&logo=postgresql&logoColor=white) | ![HTML5](https://img.shields.io/badge/html5-E34F26?style=for-the-badge&logo=html5&logoColor=white) |
+| ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi) | ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white) | ![CSS3](https://img.shields.io/badge/css3-1572B6?style=for-the-badge&logo=css3&logoColor=white) |
+| ![Uvicorn](https://img.shields.io/badge/Uvicorn-4B8BBE?style=for-the-badge) | ![Alembic](https://img.shields.io/badge/Alembic-222222?style=for-the-badge) | ![JavaScript](https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black) |
+| ![Celery](https://img.shields.io/badge/celery-37814A?style=for-the-badge&logo=celery&logoColor=white) | ![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white) | ![Jinja](https://img.shields.io/badge/Jinja-B41717?style=for-the-badge&logo=jinja&logoColor=white) |
+| ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white) | ![Pandas](https://img.shields.io/badge/pandas-150458?style=for-the-badge&logo=pandas&logoColor=white) | ![Chart.js](https://img.shields.io/badge/chart.js-F5788D?style=for-the-badge&logo=chartdotjs&logoColor=white) |
+| ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens) | ![NumPy](https://img.shields.io/badge/numpy-013243?style=for-the-badge&logo=numpy&logoColor=white) | ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) |
+| ![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white) | ![OpenStreetMap](https://img.shields.io/badge/OpenStreetMap-7EBC6F?style=for-the-badge&logo=openstreetmap&logoColor=white) | ![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white) |
+
 
 # 🔌 APIs Externas y Servicios Integrados
 
@@ -595,7 +631,7 @@ Beneficios
   
 ## ⚙️ Instalación Local
 
-### 1️⃣ Clonar el repositorio y preparar el entorno
+### 1️⃣ Clonar el repositorio
 
 ```bash
 git clone https://github.com/tuusuario/climAI.git
@@ -633,10 +669,8 @@ pip install -r requirements.txt
 ```bash
 cp .env.example .env
 ```
----
 
-Importante: Asegúrate de configurar el puerto de la base de datos al 5433 para evitar conflictos con instalaciones locales de PostgreSQL en Windows.
-
+```env
 # Base de datos
 DATABASE_URL=postgresql+asyncpg://usuario:password@localhost/climai
 
@@ -651,16 +685,11 @@ TELEGRAM_BOT_TOKEN=tu_token_de_bot
 
 # Redis
 REDIS_URL=redis://localhost:6379/0
+```
 
 ---
 
-### 5️⃣ Levantar la Infraestructura (Docker)
-Inicia la base de datos y Redis en segundo plano:
-
-Bash
-docker compose -f docker/docker-compose.yml up -d 
-
-### 6️⃣ Aplicar migraciones
+### 5️⃣ Aplicar migraciones
 
 ```bash
 alembic upgrade head
@@ -668,7 +697,7 @@ alembic upgrade head
 
 ---
 
-### 7️⃣ Arrancar FastAPI
+### 6️⃣ Arrancar FastAPI
 
 ```bash
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
@@ -676,7 +705,7 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
 ---
 
-### 8 Entrenar el modelo IA
+### 7️⃣ Entrenar el modelo IA
 
 Necesitas al menos 15 registros meteorológicos almacenados.
 
@@ -690,28 +719,6 @@ python -m app.scripts.retrain_model
 
 ```bash
 docker-compose -f docker/docker-compose.yml up --build
-```
----
-
-## ⚡ Celery Worker
-
-### Ejecución
-
-```bash
-celery -A app.core.celery_app worker --loglevel=info
-```
-
-### Tareas gestionadas
-
-- Reentrenamiento automático del modelo
-- Evaluación periódica de alertas
-- Notificaciones Telegram
-- Procesamiento desacoplado de tareas pesadas
-
-## 🧪 Testing
-
-```bash
-pytest tests/
 ```
 
 ## 🔌 API REST
@@ -747,84 +754,30 @@ curl "http://localhost:8000/api/clima?lat=40.4168&lon=-3.7038"
 ```
 
 ---
-# 🛡️ Evaluación Ética y Gobernanza del Dato
 
-## 🌱 Uso Responsable de la Inteligencia Artificial
+## ⚡ Celery Worker
 
-climAI ha sido diseñado siguiendo principios básicos de IA responsable, transparencia y minimización de riesgos asociados al tratamiento de datos meteorológicos y de geolocalización.
+### Ejecución
 
-El sistema predictivo tiene una finalidad exclusivamente informativa y no debe utilizarse para la toma de decisiones críticas relacionadas con seguridad, emergencias o actividades profesionales sensibles.
+```bash
+celery -A app.core.celery_app worker --loglevel=info
+```
 
----
+### Tareas gestionadas
 
-## 🔐 Privacidad y Protección de Datos
+- Reentrenamiento automático del modelo
+- Evaluación periódica de alertas
+- Notificaciones Telegram
+- Procesamiento desacoplado de tareas pesadas
+```
 
-La aplicación aplica principios de minimización de datos:
+## 🧪 Testing
 
-- No se almacenan coordenadas GPS persistentes salvo necesidad funcional explícita.
-- Las alertas de Telegram utilizan únicamente los identificadores necesarios para el envío de notificaciones.
-- Las credenciales y secretos se gestionan mediante variables de entorno (`.env`).
-- El acceso autenticado se protege mediante JWT y políticas de autenticación seguras.
-
-El proyecto evita el tratamiento de categorías especiales de datos personales y limita la persistencia de información identificable.
-
----
-
-## 📊 Gobernanza y Calidad del Dato
-
-Los datos meteorológicos utilizados provienen de fuentes oficiales y públicas:
-
-- AEMET OpenData API
-- OpenStreetMap / Nominatim
-
-Para garantizar calidad y consistencia:
-
-- Se aplican procesos de normalización y validación de datos.
-- El modelo IA se reentrena únicamente con datos históricos almacenados localmente.
-- Se desacopla el procesamiento mediante Celery para evitar corrupción de estados concurrentes.
-- PostgreSQL mantiene persistencia estructurada y trazabilidad de registros.
+```bash
+pytest tests/
+```
 
 ---
-
-## ⚖️ Limitaciones del Modelo Predictivo
-
-El modelo actual utiliza una aproximación basada en Regresión Lineal Multivariable, por lo que:
-
-- Las predicciones pueden contener desviaciones respecto a fenómenos meteorológicos extremos.
-- El rendimiento depende directamente de la calidad y volumen del histórico disponible.
-- El sistema no sustituye servicios meteorológicos oficiales.
-
-Las futuras versiones incluirán métricas de evaluación del modelo, monitorización de precisión y modelos temporales más avanzados (LSTM / series temporales).
-
----
-
-## 🔎 Transparencia y Explicabilidad
-
-climAI prioriza modelos interpretables frente a arquitecturas opacas.
-
-Actualmente:
-- Las variables de entrada del modelo son conocidas y documentadas.
-- El pipeline ML puede auditarse completamente.
-- El flujo de entrenamiento y predicción es reproducible.
-
-Esto facilita:
-- Trazabilidad técnica
-- Auditoría del sistema
-- Mantenimiento del modelo
-- Comprensión de las predicciones generadas
-
----
-
-## ♻️ Escalabilidad y Sostenibilidad Técnica
-
-La arquitectura desacoplada basada en FastAPI, Celery y Docker permite:
-
-- Escalar servicios independientemente
-- Optimizar consumo de recursos
-- Automatizar tareas de IA de forma eficiente
-- Reducir bloqueos y tiempos de respuesta
-
-El diseño modular favorece además la mantenibilidad y evolución futura del sistema.
 
 ## 📋 Requisitos
 
