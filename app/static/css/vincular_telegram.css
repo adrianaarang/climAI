@@ -1,33 +1,30 @@
+/* Añadir al final de app/static/css/vincular_telegram.css */
+
 /* Card de Telegram */
 .telegram-card {
     grid-column: span 2;
     padding: 2rem;
 }
-
 .card-header {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin-bottom: 2rem;
 }
-
 .telegram-logo {
     width: 40px;
     height: 40px;
 }
-
 .steps-container {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 }
-
 .step {
     display: flex;
     gap: 1rem;
     align-items: flex-start;
 }
-
 .step-num {
     background: #0088cc;
     color: white;
@@ -40,7 +37,6 @@
     font-weight: bold;
     font-size: 0.9rem;
 }
-
 .bot-link {
     color: #0088cc;
     font-weight: 600;
@@ -48,37 +44,63 @@
     border-bottom: 1px dashed #0088cc;
 }
 
-/* Contenedor del Token */
-.token-container {
-    margin-top: 1rem;
+/* Ejemplo */
+.example-box {
+    margin-top: 0.5rem;
     background: #f8f9fa;
-    border: 2px solid #e9ecef;
-    padding: 1rem;
-    border-radius: 12px;
-    display: inline-flex;
-    align-items: center;
-    gap: 1.5rem;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    color: #495057;
 }
 
-#syncToken {
+/* Formulario de vinculación */
+.vincular-form {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 0.8rem;
+    flex-wrap: wrap;
+}
+.chat-id-input {
+    flex: 1;
+    min-width: 160px;
+    padding: 0.55rem 1rem;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 1rem;
     font-family: 'Courier New', monospace;
-    font-size: 1.4rem;
-    font-weight: bold;
-    letter-spacing: 2px;
-    color: #2d3436;
+    transition: border-color 0.2s;
 }
-
-.copy-btn {
-    background: none;
+.chat-id-input:focus {
+    outline: none;
+    border-color: #0088cc;
+}
+.btn-vincular {
+    padding: 0.55rem 1.4rem;
+    background: #0088cc;
+    color: white;
     border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
     cursor: pointer;
-    font-size: 1.2rem;
-    transition: transform 0.2s;
+    transition: background 0.2s;
 }
+.btn-vincular:hover    { background: #006faa; }
+.btn-vincular:disabled { background: #a0c8e0; cursor: not-allowed; }
 
-.copy-btn:hover { transform: scale(1.2); }
+/* Mensaje de resultado */
+.vincular-msg {
+    margin-top: 0.6rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+.vincular-msg.ok    { color: #155724; }
+.vincular-msg.error { color: #721c24; }
+.vincular-msg.hidden { display: none; }
 
-/* Estados */
+/* Estado */
 .status-badge {
     display: inline-block;
     padding: 0.6rem 1.2rem;
@@ -86,14 +108,43 @@
     font-weight: 600;
     margin-bottom: 1rem;
 }
-
 .status-badge.pending { background: #fff3cd; color: #856404; }
-.status-badge.linked { background: #d4edda; color: #155724; }
+.status-badge.linked  { background: #d4edda; color: #155724; }
 
-.btn-danger {
-    display: block;
-    margin-top: 1rem;
-    color: #e74c3c;
-    text-decoration: none;
-    font-size: 0.85rem;
+.chat-id-info {
+    margin: 0.8rem 0;
+    font-size: 0.88rem;
+    color: #495057;
 }
+.chat-id-label { margin-right: 0.4rem; }
+.chat-id-value {
+    background: #f8f9fa;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+}
+
+.actions { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.refresh-btn {
+    padding: 0.5rem 1.2rem;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+    width: fit-content;
+}
+.refresh-btn:hover { background: #e9ecef; }
+
+.btn-danger-btn {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0;
+    text-align: left;
+    width: fit-content;
+}
+.btn-danger-btn:hover { text-decoration: underline; }
