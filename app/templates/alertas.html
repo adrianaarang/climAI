@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Alertas Climáticas — ClimAI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/alertas.css">
+{% endblock %}
+
+{% block content %}
+<div class="alertas-page">
+
+  <!-- CABECERA -->
+  <header class="alertas-header">
+    <div class="header-left">
+      <h1 class="alertas-titulo">
+        <span class="titulo-icono">⚡</span>
+        Centro de Alertas
+      </h1>
+      <p class="alertas-subtitulo">Monitorización en tiempo real · Actualización automática cada 60s</p>
+    </div>
+    <div class="header-right">
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        EN VIVO
+      </div>
+      <button class="btn-refresh" id="btnRefresh" title="Actualizar ahora">
+        <span class="refresh-icon">↻</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- PANEL DE RESUMEN -->
+  <section class="resumen-panel">
+    <div class="resumen-card roja" id="cardRoja">
+      <div class="resumen-num" id="numRoja">—</div>
+      <div class="resumen-label">🔴 Alerta Roja</div>
+    </div>
+    <div class="resumen-card naranja" id="cardNaranja">
+      <div class="resumen-num" id="numNaranja">—</div>
+      <div class="resumen-label">🟠 Alerta Naranja</div>
+    </div>
+    <div class="resumen-card verde" id="cardVerde">
+      <div class="resumen-num" id="numVerde">—</div>
+      <div class="resumen-label">🟢 Sin Alerta</div>
+    </div>
+  </section>
+
+  <!-- FILTROS -->
+  <section class="filtros-bar">
+    <button class="filtro-btn active" data-nivel="todos">Todas</button>
+    <button class="filtro-btn" data-nivel="ROJA">🔴 Rojas</button>
+    <button class="filtro-btn" data-nivel="NARANJA">🟠 Naranja</button>
+    <button class="filtro-btn" data-nivel="VERDE">🟢 Verde</button>
+    <div class="filtro-sep"></div>
+    <button class="filtro-btn" data-tipo="TEMPERATURA">🌡️ Temperatura</button>
+    <button class="filtro-btn" data-tipo="VIENTO">💨 Viento</button>
+    <button class="filtro-btn" data-tipo="LLUVIA">🌧️ Lluvia</button>
+  </section>
+
+  <!-- ESTADO DE CARGA / ERROR -->
+  <div id="loadingState" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando alertas...</p>
+  </div>
+  <div id="errorState" class="error-state hidden">
+    <span class="error-icon">⚠️</span>
+    <p id="errorMsg">Error al cargar alertas</p>
+    <button class="btn-retry" id="btnRetry">Reintentar</button>
+  </div>
+  <div id="emptyState" class="empty-state hidden">
+    <span class="empty-icon">✅</span>
+    <p>No hay alertas activas en este momento.</p>
+    <p class="empty-sub">Todas las estaciones dentro de parámetros normales.</p>
+  </div>
+
+  <!-- LISTA DE ALERTAS -->
+  <section class="alertas-grid" id="alertasGrid"></section>
+
+  <!-- PANEL TELEGRAM -->
+  <section class="telegram-panel" id="telegramPanel">
+    <div class="telegram-header">
+      <span class="telegram-icon">✈️</span>
+      <div>
+        <h3>Notificaciones Telegram</h3>
+        <p>Recibe alertas directamente en tu Telegram</p>
+      </div>
+      <div class="telegram-estado" id="telegramEstado">
+        <span class="estado-dot inactivo"></span>
+        <span id="telegramEstadoTexto">No vinculado</span>
+      </div>
+    </div>
+    <div class="telegram-actions">
+      <a href="/vincular_telegram" class="btn-telegram-link">Vincular Telegram</a>
+      <button class="btn-telegram-test" id="btnTestTelegram">Enviar prueba</button>
+    </div>
+  </section>
+
+</div>
+
+<!-- TOAST DE NOTIFICACIÓN -->
+<div class="toast" id="toast"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/alertas.js"></script>
+{% endblock %}

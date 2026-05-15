@@ -12,6 +12,11 @@ from app.db.session import engine, get_db
 from app.db.base_class import Base
 from app.models.database import User
 from app.routers.auth import obtener_usuario_actual
+from app.routers.alertas import router as alertas_router
+from app.routers.telegram_bot import router as telegram_router
+
+
+
 
 from app.routers.auth import router as auth_router
 from app.routers.views import router as views_router
@@ -49,6 +54,10 @@ app.include_router(auth_jwt_router, prefix="/api/v1")
 app.include_router(predict_router,  prefix="/api/v1")
 app.include_router(provincias_router)
 app.include_router(views_router)
+app.include_router(alertas_router)
+app.include_router(telegram_router)
+
+
 
 # ── API Clima (index.html) ─────────────────────────────────────────────────────
 try:
@@ -92,24 +101,5 @@ try:
 
 except ImportError as e:
     print(f"[main] weather_service no disponible: {e}")
-
-# ── API Alertas ────────────────────────────────────────────────────────────────
-try:
-    from app.services.alert_service import AlertService
-
-    @app.post("/api/alertas/crear")
-    async def api_crear_alerta(datos: dict, request: Request, db: AsyncSession = Depends(get_db)):
-        user_email = obtener_usuario_actual(request)
-        if not user_email:
-            return {"status": "error", "message": "No logueado"}
-        result = await db.execute(select(User).where(User.email == user_email))
-        user = result.scalar_one_or_none()
-        if user:
-            service = AlertService(db)
-            return await service.crear_alerta(user, datos)
         
-
-except ImportError as e:
-    print(f"[main] alert_service no disponible: {e}")
-
     
