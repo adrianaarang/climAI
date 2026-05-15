@@ -1,6 +1,7 @@
 # climAI 🌤  Predicción Meteorológica Inteligente
 
 **climAI** es una aplicación web de meteorología avanzada que combina datos en tiempo real de la API de **AEMET** con modelos de **Machine Learning** para ofrecer predicciones climáticas personalizadas y un sistema de alertas asíncronas vía Telegram.
+
 ---
 
 ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
@@ -13,39 +14,47 @@
 
 # 🚀 Características principales
 
-## 🌍  Dashboard Meteorológico
-* ** Detección automática de la ubicación del usuario mediante Nominatim, mostrando temperatura, humedad, viento, precipitación y el histórico de las últimas 24h de la estación AEMET más cercana.
+## 🌍 Dashboard Meteorológico
+Detección automática de la ubicación del usuario mediante Nominatim, mostrando temperatura, humedad, viento, precipitación y el histórico de las últimas 24h de la estación AEMET más cercana.
 
 ## 🧠 Predicción IA
-* ** Modelo de Regresión Lineal Multivariable (scikit-learn) que ajusta la temperatura actual, detecta tendencias térmicas (📈 Ascenso, ➖ Estable, 📉 Descenso) y mejora progresivamente con el reentrenamiento automático.
+Modelo de Regresión Lineal Multivariable (scikit-learn) que ajusta la temperatura actual, detecta tendencias térmicas (📈 Ascenso, ➖ Estable, 📉 Descenso) y mejora progresivamente con el reentrenamiento automático.
 
 ## 📅 Pronóstico inteligente de 5 días
-* ** Consumo del endpoint municipal de AEMET con correcciones predictivas aplicadas por nuestro motor de IA.
+Consumo del endpoint municipal de AEMET con correcciones predictivas aplicadas por nuestro motor de IA.
 
-## 🚨 Alertas climáticas
-* Sistema de Alertas por Telegram:** Configuración personalizada de alertas climáticas (temperatura máxima/mínima, lluvia, viento). 
-El motor asíncrono evalúa las condiciones y envía notificaciones automáticas al usuario mediante un Bot de Telegram.
+## 🚨 Sistema de Alertas Climáticas
+Centro de alertas en tiempo real con tres niveles de severidad:
+
+| Nivel | Color | Condiciones |
+|---|---|---|
+| Alerta Roja | 🔴 | Temp ≥ 40°C, temp ≤ -5°C, viento > 70 km/h, lluvia > 30 mm |
+| Alerta Naranja | 🟠 | Temp ≥ 35°C, temp ≤ 0°C, viento > 40 km/h, lluvia > 10 mm |
+| Sin alerta | 🟢 | Condiciones dentro de parámetros normales |
+
+La interfaz se actualiza automáticamente cada 60 segundos y permite filtrar por nivel y tipo de fenómeno.
+
+## ✈️ Notificaciones Telegram
+Recibe alertas climáticas directamente en Telegram sin configuración adicional:
+
+1. Abre Telegram y escríbele a **@userinfobot**
+2. Copia el número de tu `Id`
+3. Ve a ClimAI → Vincular Telegram → pega el ID y pulsa **Vincular**
+4. Recibirás un mensaje de confirmación al instante
+
+> No requiere ngrok ni instalaciones externas.
 
 ## 📊 Estadísticas avanzadas
-* ** Visualización interactiva con Chart.js de:
-- Temperatura media de todas las provincias españolas
-- Ranking climático nacional
-- Gráficas comparativas
-- Correlación humedad ↔ temperatura
-- Tendencias por provincias
+Visualización interactiva con Chart.js de temperatura media por provincias, ranking climático nacional, correlación humedad ↔ temperatura y tendencias comparativas.
 
-## ⚙️ Arquitectura asíncronas
-* ** Integración de Celery y Redis para el procesamiento en segundo plano (reentrenamiento del modelo, evaluación de alertas y envío de mensajería) sin bloquear el servidor web.
-
-Celery gestiona procesos en background:
-
+## ⚙️ Arquitectura asíncrona
+Integración de Celery y Redis para el procesamiento en segundo plano sin bloquear el servidor web:
 - Reentrenamiento automático del modelo IA
 - Evaluación periódica de alertas
 - Envío de notificaciones Telegram
 - Procesamiento desacoplado de tareas pesadas
 
-## 🔍 Búsqueda por provincia (geolocalización)
-
+## 🔍 Búsqueda por provincia
 Permite consultar el tiempo de cualquier provincia española sin necesidad de geolocalización.
 
 ---
@@ -85,7 +94,6 @@ Weather Service ──► ML Engine
                      │
                      ▼
              Predicción IA
-
 ```
 
 ---
@@ -94,155 +102,66 @@ Weather Service ──► ML Engine
 
 ## 🌦️ AEMET OpenData API
 
-AEMET OpenData es la principal fuente de datos meteorológicos del proyecto.
-
-La integración funciona en dos pasos:
+Principal fuente de datos meteorológicos. La integración funciona en dos pasos:
 
 1. Solicitud de una URL temporal autenticada
 2. Descarga y procesamiento del JSON meteorológico
 
-### 📡 Datos consumidos
-
-- Temperatura
-- Humedad relativa
-- Velocidad del viento
-- Precipitación
+### Datos consumidos
+- Temperatura, humedad relativa, velocidad del viento, precipitación
 - Observaciones por estación
 - Pronóstico municipal de 5 días
 
 El sistema selecciona automáticamente la estación meteorológica más cercana usando coordenadas geográficas y cálculo Haversine.
+
 ---
 
 ## 🗺️ Nominatim + OpenStreetMap
 
-OpenStreetMap Nominatim se utiliza para geocodificación inversa.
+Transforma coordenadas en provincia/municipio para filtrar estaciones y mejorar la experiencia del usuario.
 
-Transforma:
-```text
-Latitud + Longitud
-        ↓
-Provincia / Municipio
-```
-
-Esto permite:
-
-- Filtrar estaciones cercanas
-- Mostrar la ciudad detectada
-- Consultar provincias sin GPS
-- Mejorar la experiencia del usuario
-
-  ---
-  
-## ⚡ Backend y Servidor
-## 🚀 FastAPI
-
-FastAPI es el núcleo del backend.
-
- Motivos de elección
- 
-- Alto rendimiento
-- Soporte nativo async/await
-- Documentación automática OpenAPI
-- Arquitectura moderna y escalable
-- Excelente integración con Pydantic
-
-Gracias al enfoque asíncrono, la aplicación puede manejar múltiples consultas meteorológicas simultáneamente sin bloquear el servidor.
 ---
 
-## 🌐 Uvicorn
+## ⚡ Backend y Servidor
 
-Uvicorn es el servidor ASGI encargado de ejecutar la aplicación FastAPI.
+### 🚀 FastAPI
+Núcleo del backend. Alto rendimiento, soporte nativo async/await, documentación automática OpenAPI y excelente integración con Pydantic.
 
-Proporciona:
+### 🌐 Uvicorn
+Servidor ASGI que ejecuta FastAPI con alto rendimiento y soporte WebSockets.
 
-- Alto rendimiento
-- WebSockets
-- Compatibilidad ASGI
-- Concurrencia eficiente
+### 🎨 Jinja2
+Renderiza HTML dinámico para el dashboard, estadísticas, login y vistas de alertas.
 
-## 🎨 Jinja2
-
-Jinja2 renderiza HTML dinámico desde el servidor.
-
-Se utiliza para:
-
-- Dashboard meteorológico
-- Estadísticas
-- Login y autenticación
-- Renderizado de vistas dinámicas
+---
 
 ## 🗄️ Base de Datos y Persistencia
-# 🐘 PostgreSQL
 
-PostgreSQL almacena:
+### 🐘 PostgreSQL
+Almacena usuarios, alertas, históricos meteorológicos, logs, predicciones y configuración.
 
-- Usuarios
-- Alertas
-- Históricos meteorológicos
-- Logs
-- Predicciones
-- Configuración
+### 🧩 SQLAlchemy Async
+ORM robusto con consultas async y soporte para relaciones complejas.
 
-## 🧩 SQLAlchemy Async
+### 🔄 Alembic
+Gestiona el versionado y las migraciones de la base de datos.
 
-SQLAlchemy permite interactuar con PostgreSQL de forma asíncrona.
+---
 
-Ventajas
-- ORM robusto
-- Consultas async
-- Relaciones complejas
-- Escalabilidad
-- Integración con Alembic
+## 🧠 Inteligencia Artificial
 
-## 🔄 Alembic
+### 🤖 scikit-learn
+Regresión Lineal Multivariable para predecir temperatura corregida y tendencia térmica.
 
-Alembic gestiona el versionado y las migraciones de la base de datos.
+### 📊 Pandas y NumPy
+Limpieza, transformación y normalización de datos meteorológicos.
 
-Permite:
+### 💾 Joblib
+Serializa el modelo entrenado en `.pkl` para inferencia en tiempo real.
 
-- Crear nuevas tablas
-- Modificar esquemas
-- Sincronizar entornos
-- Mantener histórico de cambios
-  
-## 🧠 Inteligencia Artificial y Procesamiento de Datos
-# 🤖 scikit-learn
+---
 
-scikit-learn se utiliza para entrenar el modelo predictivo.
-
-Modelo actual
-- Regresión Lineal Multivariable
-Objetivo
-
-Predecir:
-
-- Temperatura corregida
-- Tendencia térmica
-  # 📊 Pandas y NumPy
-
-Pandas y NumPy se utilizan para:
-
-- Limpieza de datos
-- Transformaciones
-- Normalización
-- Preparación del dataset
-- Ingeniería de variables
-
-# 💾 Joblib
-
-Joblib permite serializar el modelo entrenado en un archivo .pkl.
-
-```text
-Entrenamiento
-      ↓
-modelo_clima.pkl
-      ↓
-Carga en tiempo real
-      ↓
-Inferencia IA
-```
-
-# 🧱 Arquitectura Técnica
+## 🧱 Arquitectura Técnica
 
 | Capa | Tecnología |
 |---|---|
@@ -258,24 +177,8 @@ Inferencia IA
 | Notificaciones | Telegram Bot API |
 | Contenedores | Docker + Docker Compose |
 
-# 🧠 Detalles del Modelo IA
+---
 
-## Algoritmo
-
-Modelo de Regresión Lineal Multivariable usando scikit-learn.
-
---- 
-
-## Features de Entrada
-- Temperatura actual
-- Humedad relativa
-- Hora del día transformada en sinusoide
-- Variables temporales derivadas
-  
-## Target
-- Temperatura corregida
-- Tendencia térmica
-  
 ## 🧠 Pipeline ML
 
 ```text
@@ -296,143 +199,18 @@ modelo_clima.pkl
     ▼
 Predicción IA
 ```
----
-## Funcionamiento
 
-Cada vez que un usuario consulta el clima:
-
-1. Se almacenan datos meteorológicos reales
-2. PostgreSQL acumula histórico
-3. Celery puede lanzar reentrenamientos automáticos
-4. El modelo .pkl se actualiza
-5. Las futuras predicciones mejoran progresivamente
----
-# 🔄 Tareas Asíncronas y Mensajería
-## Celery
-
-Celery ejecuta tareas pesadas en background.
-
-## Procesos gestionados
-- Reentrenamiento automático IA
-- Evaluación de alertas
-- Envío de notificaciones
-- Automatización programada
-
-Esto evita bloquear las peticiones HTTP del usuario.
 ---
 
-## 🔴 Redis
-
-Redis funciona como broker entre FastAPI y Celery.
-
-Gestiona:
-
-- Cola de tareas
-- Mensajería interna
-- Caché temporal
-- Alertas Personalizas
-  
-# 📱 Notificaciones y Frontend
-## ✈️ Telegram Bot API
-
-Telegram se utiliza para enviar alertas meteorológicas en tiempo real.
-
-Ejemplos
-- Riesgo de lluvia
-- Temperaturas extremas
-- Cambios bruscos
-- Alertas personalizadas
-
-## 📈 Chart.js
-
-Chart.js transforma datos climáticos en gráficas interactivas.
-
-- Visualizaciones
-- Temperatura histórica
-- Rankings provinciales
-- Comparativas
-- Tendencias climáticas
-
-## 🟨 Vanilla JavaScript + Fetch API
-
-El frontend utiliza JavaScript Vanilla para realizar peticiones asíncronas al backend mediante Fetch API.
-
-Ventajas
-- Sin dependencias pesadas
-- Mayor rendimiento
-- Menor complejidad
-- Arquitectura ligera
-  
-## 🐳 DevOps y Despliegue
-## 📦 Docker + Docker Compose
-
-Docker permite contenerizar toda la infraestructura.
-
-Servicios aislados
-- FastAPI
-- PostgreSQL
-- Redis
-- Celery Worker
-  
-Beneficios
-- Entorno reproducible
-- Fácil despliegue
-- Portabilidad
-- Escalabilidad
-  
-## 🔐 Python-dotenv
-
-python-dotenv gestiona variables sensibles mediante archivos .env.
-
-Ejemplos
-- API Keys
-- JWT Secret
-- Credenciales PostgreSQL
-- Tokens Telegram
-  
-## 🔄 Flujo Tecnológico Completo
-```text
-1. Navegador del usuario
-        │
-        ▼
-2. Geolocalización GPS
-        │
-        ▼
-3. Nominatim (Provincia/Municipio)
-        │
-        ▼
-4. FastAPI
-        │
-        ├── Consulta AEMET
-        │
-        ├── Consulta PostgreSQL
-        │
-        └── Ejecuta ML Engine
-                    │
-                    ▼
-             scikit-learn
-                    │
-                    ▼
-           Predicción IA
-                    │
-                    ▼
-          Respuesta al frontend
-                    │
-                    ▼
-          Chart.js renderiza datos
-
-Procesos paralelos:
-Celery + Redis → Alertas → Telegram Bot API
-
-```
 ## 📁 Estructura del Proyecto
+
 ```text
-climAI/
-│   logs
-│   main.py
+│climAI
+│ logs                  
+│   main.py                                                                   
 │   __init__.py
-│   
-├───api
+│                                                                                           
+├───api                                                  
 │   │   __init__.py
 │   │   
 │   ├───v1
@@ -447,13 +225,17 @@ climAI/
 │   │   │   │   
 │   │   │   └───__pycache__
 │   │   │           auth_jwt.cpython-313.pyc
+│   │   │           auth_jwt.cpython-314.pyc
 │   │   │           predict.cpython-313.pyc
+│   │   │           predict.cpython-314.pyc
 │   │   │           
 │   │   └───__pycache__
 │   │           __init__.cpython-313.pyc
+│   │           __init__.cpython-314.pyc
 │   │           
 │   └───__pycache__
 │           __init__.cpython-313.pyc
+│           __init__.cpython-314.pyc
 │           
 ├───core
 │   │   celery_app.py
@@ -462,10 +244,16 @@ climAI/
 │   │   __init__.py
 │   │   
 │   ├───resources
+│   │       estaciones_madrid.json
+│   │       municipios.json
+│   │       
 │   └───__pycache__
 │           config.cpython-313.pyc
+│           config.cpython-314.pyc
 │           security.cpython-313.pyc
+│           security.cpython-314.pyc
 │           __init__.cpython-313.pyc
+│           __init__.cpython-314.pyc
 │           
 ├───db
 │   │   base.py
@@ -475,8 +263,11 @@ climAI/
 │   │   
 │   └───__pycache__
 │           base_class.cpython-313.pyc
+│           base_class.cpython-314.pyc
 │           session.cpython-313.pyc
+│           session.cpython-314.pyc
 │           __init__.cpython-313.pyc
+│           __init__.cpython-314.pyc
 │           
 ├───models
 │   │   database.py
@@ -484,17 +275,26 @@ climAI/
 │   │   
 │   └───__pycache__
 │           database.cpython-313.pyc
+│           database.cpython-314.pyc
 │           __init__.cpython-313.pyc
+│           __init__.cpython-314.pyc
 │           
 ├───routers
+│   │   alertas.py
 │   │   auth.py
 │   │   provincias.py
+│   │   telegram_bot.py
 │   │   views.py
 │   │   
 │   └───__pycache__
+│           alertas.cpython-314.pyc
 │           auth.cpython-313.pyc
+│           auth.cpython-314.pyc
 │           provincias.cpython-313.pyc
+│           provincias.cpython-314.pyc
+│           telegram_bot.cpython-314.pyc
 │           views.cpython-313.pyc
+│           views.cpython-314.pyc
 │           
 ├───schemas
 │   │   registro.py
@@ -504,8 +304,11 @@ climAI/
 │   │   
 │   └───__pycache__
 │           registro.cpython-313.pyc
+│           registro.cpython-314.pyc
 │           token.cpython-313.pyc
+│           token.cpython-314.pyc
 │           __init__.cpython-313.pyc
+│           __init__.cpython-314.pyc
 │           
 ├───scripts
 │   │   retrain_model.py
@@ -528,13 +331,23 @@ climAI/
 │   │   
 │   └───__pycache__
 │           aemet_client.cpython-313.pyc
+│           aemet_client.cpython-314.pyc
 │           alert_service.cpython-313.pyc
+│           alert_service.cpython-314.pyc
 │           geo_utils.cpython-313.pyc
+│           geo_utils.cpython-314.pyc
 │           logging_service.cpython-313.pyc
+│           logging_service.cpython-314.pyc
+│           notifier_service.cpython-313.pyc
+│           notifier_service.cpython-314.pyc
 │           stats_service.cpython-313.pyc
+│           stats_service.cpython-314.pyc
 │           weather_ai_service.cpython-313.pyc
+│           weather_ai_service.cpython-314.pyc
 │           weather_service.cpython-313.pyc
+│           weather_service.cpython-314.pyc
 │           __init__.cpython-313.pyc
+│           __init__.cpython-314.pyc
 │           
 ├───static
 │   ├───css
@@ -569,13 +382,16 @@ climAI/
 │       
 └───__pycache__
         main.cpython-313.pyc
+        main.cpython-314.pyc
         __init__.cpython-313.pyc
-        
+        __init__.cpython-314.pyc
 ```
+
+---
 
 ## 🏛️ Decisiones de Arquitectura
 
-# 📌 Separación de responsabilidades
+### 📌 Separación de responsabilidades
 
 | Carpeta | Responsabilidad |
 |---|---|
@@ -586,23 +402,23 @@ climAI/
 | `models/` | Modelos ORM |
 | `core/` | Configuración global |
 
-Beneficios
+Beneficios:
 - Código desacoplado
 - Testing más sencillo
 - Mayor mantenibilidad
 - Reutilización de lógica
 - Escalabilidad futura
-  
+
+---
+
 ## ⚙️ Instalación Local
 
-### 1️⃣ Clonar el repositorio y preparar el entorno
+### 1️⃣ Clonar el repositorio
 
 ```bash
 git clone https://github.com/tuusuario/climAI.git
 cd climAI
 ```
-
----
 
 ### 2️⃣ Crear entorno virtual
 
@@ -618,47 +434,44 @@ python -m venv venv
 source venv/bin/activate
 ```
 
----
-
 ### 3️⃣ Instalar dependencias
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
-
 ### 4️⃣ Configurar variables de entorno
 
 ```bash
 cp .env.example .env
 ```
----
 
-Importante: Asegúrate de configurar el puerto de la base de datos al 5433 para evitar conflictos con instalaciones locales de PostgreSQL en Windows.
+Edita el `.env` con tus valores:
 
+```env
 # Base de datos
-DATABASE_URL=postgresql+asyncpg://usuario:password@localhost/climai
+DATABASE_URL=postgresql+asyncpg://usuario:password@localhost:5433/climai
 
-# API AEMET
+# API AEMET (regístrate en opendata.aemet.es)
 AEMET_API_KEY=tu_clave_aqui
 
 # JWT
 SECRET_KEY=tu_secret_key_segura
 
-# Telegram
+# Telegram (opcional — obtén el token con @BotFather)
 TELEGRAM_BOT_TOKEN=tu_token_de_bot
 
 # Redis
 REDIS_URL=redis://localhost:6379/0
+```
 
----
+> ⚠️ Usa el puerto `5433` en Windows para evitar conflictos con instalaciones locales de PostgreSQL.
 
-### 5️⃣ Levantar la Infraestructura (Docker)
-Inicia la base de datos y Redis en segundo plano:
+### 5️⃣ Levantar la infraestructura (Docker)
 
-Bash
-docker compose -f docker/docker-compose.yml up -d 
+```bash
+docker compose -f docker/docker-compose.yml up -d
+```
 
 ### 6️⃣ Aplicar migraciones
 
@@ -666,17 +479,13 @@ docker compose -f docker/docker-compose.yml up -d
 alembic upgrade head
 ```
 
----
-
 ### 7️⃣ Arrancar FastAPI
 
 ```bash
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
----
-
-### 8 Entrenar el modelo IA
+### 8️⃣ Entrenar el modelo IA
 
 Necesitas al menos 15 registros meteorológicos almacenados.
 
@@ -691,28 +500,30 @@ python -m app.scripts.retrain_model
 ```bash
 docker-compose -f docker/docker-compose.yml up --build
 ```
+
 ---
 
 ## ⚡ Celery Worker
-
-### Ejecución
 
 ```bash
 celery -A app.core.celery_app worker --loglevel=info
 ```
 
 ### Tareas gestionadas
-
 - Reentrenamiento automático del modelo
 - Evaluación periódica de alertas
 - Notificaciones Telegram
 - Procesamiento desacoplado de tareas pesadas
+
+---
 
 ## 🧪 Testing
 
 ```bash
 pytest tests/
 ```
+
+---
 
 ## 🔌 API REST
 
@@ -722,7 +533,14 @@ pytest tests/
 | `/api/v1/predict` | GET | Predicción IA + pronóstico | ✅ |
 | `/api/v1/auth/token` | POST | Login JWT | ❌ |
 | `/api/provinces` | GET | Lista provincias | ❌ |
-| `/api/alertas/crear` | POST | Crear alerta personalizada | ✅ |
+| `/api/alertas/activas` | GET | Alertas activas en tiempo real | ✅ |
+| `/api/alertas/resumen` | GET | Conteo por nivel (roja/naranja/verde) | ❌ |
+| `/api/alertas/notificar` | POST | Enviar alerta por Telegram | ✅ |
+| `/api/telegram/vincular-manual` | POST | Vincular cuenta Telegram por chat_id | ✅ |
+| `/api/telegram/desvincular` | POST | Desvincular Telegram | ✅ |
+| `/api/telegram/estado` | GET | Estado de vinculación | ✅ |
+
+---
 
 ## 📦 Ejemplo de Respuesta
 
@@ -742,11 +560,13 @@ curl "http://localhost:8000/api/clima?lat=40.4168&lon=-3.7038"
   "pronostico_ia": {
     "temperatura": 23.1,
     "tendencia": "En ascenso"
-  }
+  },
+  "alertas": ["VERDE"]
 }
 ```
 
 ---
+
 # 🛡️ Evaluación Ética y Gobernanza del Dato
 
 ## 🌱 Uso Responsable de la Inteligencia Artificial
@@ -800,31 +620,19 @@ Las futuras versiones incluirán métricas de evaluación del modelo, monitoriza
 
 ## 🔎 Transparencia y Explicabilidad
 
-climAI prioriza modelos interpretables frente a arquitecturas opacas.
+climAI prioriza modelos interpretables frente a arquitecturas opacas:
 
-Actualmente:
 - Las variables de entrada del modelo son conocidas y documentadas.
 - El pipeline ML puede auditarse completamente.
 - El flujo de entrenamiento y predicción es reproducible.
-
-Esto facilita:
-- Trazabilidad técnica
-- Auditoría del sistema
-- Mantenimiento del modelo
-- Comprensión de las predicciones generadas
 
 ---
 
 ## ♻️ Escalabilidad y Sostenibilidad Técnica
 
-La arquitectura desacoplada basada en FastAPI, Celery y Docker permite:
+La arquitectura desacoplada basada en FastAPI, Celery y Docker permite escalar servicios independientemente, optimizar consumo de recursos y automatizar tareas de IA de forma eficiente.
 
-- Escalar servicios independientemente
-- Optimizar consumo de recursos
-- Automatizar tareas de IA de forma eficiente
-- Reducir bloqueos y tiempos de respuesta
-
-El diseño modular favorece además la mantenibilidad y evolución futura del sistema.
+---
 
 ## 📋 Requisitos
 
@@ -842,8 +650,11 @@ El diseño modular favorece además la mantenibilidad y evolución futura del si
 - Pronóstico inteligente IA
 - Estadísticas de provincias
 - Gráficas históricas
-- Sistema de alertas
-  
+- Centro de alertas climáticas
+- Vinculación Telegram
+
+---
+
 ## 🗺️ Roadmap
 
 - Implementar modelos LSTM para series temporales
@@ -852,6 +663,7 @@ El diseño modular favorece además la mantenibilidad y evolución futura del si
 - Aplicación móvil nativa
 - Métricas de precisión del modelo
 - Panel admin para monitorizar workers Celery
+- Webhook Telegram con dominio propio
 
 ---
 
@@ -879,8 +691,8 @@ git push origin feature/AmazingFeature
 ## 👤 Autores
 
 - Scrum: Adriana Aránguez
-- Product: María Roldán 
-- Desarrolladores:  María Isabel Durando, Laura Silva Rubio, Javier CR
+- Product: María Roldán
+- Desarrolladores: María Isabel Durando, Laura Silva Rubio, Javier CR
 
 ---
 
@@ -889,6 +701,7 @@ git push origin feature/AmazingFeature
 Este proyecto tiene fines educativos y de portfolio.
 
 Los datos meteorológicos pertenecen a AEMET y deben utilizarse respetando las condiciones de uso de su API OpenData.
+
 
 ----
 ## 📄 Licencia
