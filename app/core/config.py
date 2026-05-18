@@ -12,34 +12,43 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = False
 
-    # ── Base de datos (Persona 1) ────────────────────────
-    POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
-    POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "password")
-    POSTGRES_DB: str = os.getenv("POSTGRES_DB", "climai_db")
-    DATABASE_URL: str = os.getenv(
-        "DATABASE_URL",
-        f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@db:5432/{POSTGRES_DB}"
-)
+    # ── Base de datos ────────────────────────────────────
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = "password"
+    POSTGRES_DB: str = "climai_db"
 
-    # ── Servicios externos (Persona 1) ───────────────────
-    AEMET_API_KEY: str = os.getenv("AEMET_API_KEY", "")
-    REDIS_URL: str = os.getenv("REDIS_URL", "redis://redis:6379/0")
+    # DATABASE_URL se construye en un validator para usar los valores
+    # reales del entorno, no los defaults de clase evaluados en tiempo de definición
+    DATABASE_URL: str = ""
 
-    TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
+    # ── Servicios externos ───────────────────────────────
+    AEMET_API_KEY: str = ""
+    REDIS_URL: str = "redis://redis:6379/0"
+    TELEGRAM_BOT_TOKEN: str = ""
 
-    # ── Seguridad JWT (tu responsabilidad) ───────────────
-    SECRET_KEY: str = os.getenv(
-        "SECRET_KEY",
-        "cambia_esta_clave_en_produccion_minimo_32_chars"
-    )
+    # ── Seguridad JWT ────────────────────────────────────
+    SECRET_KEY: str = "cambia_esta_clave_en_produccion_minimo_32_chars"
 
-    # ── CORS (tu responsabilidad) ────────────────────────
+    # ── CORS ─────────────────────────────────────────────
     ALLOWED_ORIGINS: list[str] = [
         "http://localhost:3000",
-        "http://localhost:8000"
+        "http://localhost:8000",
     ]
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "allow"}
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "extra": "allow",
+    }
+
+    def model_post_init(self, __context) -> None:
+        # Si DATABASE_URL no viene del entorno, la construimos con los valores reales
+        if not self.DATABASE_URL:
+            object.__setattr__(
+                self,
+                "DATABASE_URL",
+                f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@db:5432/{self.POSTGRES_DB}",
+            )
 
 
 @lru_cache()

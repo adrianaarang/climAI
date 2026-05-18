@@ -18,7 +18,7 @@ async def fetch_observaciones(client: httpx.AsyncClient, headers: dict) -> Optio
     """
     Descarga todas las observaciones de AEMET en tiempo real.
     AEMET responde con una URL intermedia — hay que hacer dos peticiones.
-    Reintenta hasta 3 veces si hay error.
+    Reintenta hasta 3 veces con backoff exponencial si hay error.
     """
     for intento in range(3):
         try:
@@ -28,11 +28,20 @@ async def fetch_observaciones(client: httpx.AsyncClient, headers: dict) -> Optio
 
             if url_datos:
                 await asyncio.sleep(0.5)
-                r_datos = await client.get(url_datos)
+                # FIX: la segunda petición también necesita headers con la api_key
+                r_datos = await client.get(url_datos, headers=headers)
+                r_datos.raise_for_status()
                 return json.loads(r_datos.content.decode("latin-1", errors="replace"))
+
+            logger.warning(f"Reintento AEMET {intento+1}/3: la respuesta no contiene 'datos'")
+
         except Exception as e:
-            logger.warning(f"Reintento AEMET {intento+1}/3: {e}")
-            await asyncio.sleep(1)
+            # FIX: repr() muestra el tipo y el mensaje aunque str(e) esté vacío
+            logger.warning(f"Reintento AEMET {intento+1}/3: {type(e).__name__}: {e!r}")
+
+        # Backoff exponencial: 1s, 2s, 4s
+        await asyncio.sleep(2 ** intento)
+
     return None
 
 
@@ -44,7 +53,7 @@ def find_nearest_station(lat: float, lon: float, obs: List[Dict]) -> tuple:
             d = calcular_distancia(lat, lon, float(o["lat"]), float(o["lon"]))
             if d < dist_min:
                 dist_min, est_min = d, o
-        except:
+        except Exception:
             continue
     return est_min, dist_min
 
@@ -82,7 +91,8 @@ async def fetch_pronostico_dias(client: httpx.AsyncClient, headers: dict, lat: f
             return []
 
         await asyncio.sleep(0.3)
-        r_lista = await client.get(url_municipios)
+        r_lista = await client.get(url_municipios, headers=headers)
+        r_lista.raise_for_status()
         lista   = json.loads(r_lista.content.decode("latin-1", errors="replace"))
         logger.info(f"Municipios descargados: {len(lista)}")
 
@@ -104,7 +114,8 @@ async def fetch_pronostico_dias(client: httpx.AsyncClient, headers: dict, lat: f
             return []
 
         await asyncio.sleep(0.5)
-        r3   = await client.get(url_pred)
+        r3   = await client.get(url_pred, headers=headers)
+        r3.raise_for_status()
         pred = json.loads(r3.content.decode("latin-1", errors="replace"))
 
         dias = pred[0]["prediccion"]["dia"]
@@ -122,5 +133,5 @@ async def fetch_pronostico_dias(client: httpx.AsyncClient, headers: dict, lat: f
         ]
 
     except Exception as e:
-        logger.warning(f"Error obteniendo pronóstico municipal: {e}")
+        logger.warning(f"Error obteniendo pronóstico municipal: {type(e).__name__}: {e!r}")
         return []
